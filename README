@@ -1,6 +1,11 @@
 To use the archetype, 
 
-  git clone <this repository> my-new-project
-  cd my-new-project
-  # Edit properties.yaml
+  # Choose a project name
+  read -p "Project name: " PROJECT
+  # Clone this template
+  git clone <this repository> "$PROJECT"
+  cd "$PROJECT"
+  # Set the project properties (edit properties.yaml)
+  ${EDITOR:=nano} properties.yaml
+  # Initialize the template
   ./init.rb
