@@ -1,0 +1,6 @@
+To use the archetype, 
+
+  git clone <this repository> my-new-project
+  cd my-new-project
+  # Edit properties.yaml
+  ./init.rb
