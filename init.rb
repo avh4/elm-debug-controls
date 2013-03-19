@@ -73,7 +73,7 @@ Find.find(".") do |path|
 end
 
 puts "Successful.  Cleaning up..."
-files_to_delete = [ "init.rb", "README" ]
+files_to_delete = [ "init.rb", "README.md" ]
 files_to_delete.each do |file|
   puts "Removing #{file}..."
   File.delete file
