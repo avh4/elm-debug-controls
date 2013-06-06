@@ -29,6 +29,7 @@ while true
     break
   when "e"
     system "${EDITOR:=nano} #{properties_filename}"
+    system "git commit #{properties_filename} -m 'Updated project properties.'"
   when "?"
     puts red("y - perform project initialization with the current properties")
     puts red("n - quit; do not perform project initializiation")
@@ -102,7 +103,8 @@ files_to_delete.each do |file|
   File.delete file
 end
 
-puts "Done!"
+puts "Commiting to git..."
 system("git add -A")
 system("git commit -m 'Initialize project.'")
 system("git clean -df")
+puts "Done!  If you need to undo the initialization, `git reset --hard HEAD^`"
