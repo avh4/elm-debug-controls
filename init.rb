@@ -80,3 +80,6 @@ files_to_delete.each do |file|
 end
 
 puts "Done!"
+system("git add -A")
+system("git commit -m 'Initialize project.'")
+system("git clean -df")
