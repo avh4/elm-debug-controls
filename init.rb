@@ -82,7 +82,7 @@ Find.find(".") do |path|
       # process the file
       rendering = Liquid::Template.parse(template).render properties
       # write the file
-      File.open(name, "w").write(rendering)
+      File.open(name, "w") { |f| f.write(rendering) }
       # Delete the template file
       File.delete path
     elsif name == path then
