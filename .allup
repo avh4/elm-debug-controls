@@ -1,0 +1,6 @@
+{
+  "commands": {
+    "run": "elm-reactor",
+    "test": "./ci.sh"
+  }
+}
