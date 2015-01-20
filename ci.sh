@@ -9,7 +9,7 @@ if [ "$1" == "--clean" ]; then
   rm -Rf elm-stuff/build-artifacts
 fi
 
-if [ ! -d node_modules/jsdom ]; then
+if ! npm list | grep " jsdom@"; then
   npm install jsdom
 fi
 
