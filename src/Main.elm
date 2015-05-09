@@ -1,5 +1,5 @@
 module Main where
 
-import Text
+import Html
 
-main = Text.asText "Hello world"
+main = Html.text "Hello world"

@@ -1,9 +1,9 @@
 module Main where
 
-import IO.IO (..)
-import IO.Runner (Request, Response, run)
+import IO.IO exposing (..)
+import IO.Runner exposing (Request, Response, run)
 
-import ElmTest.Runner.Console (runDisplay)
+import ElmTest.Runner.Console exposing (runDisplay)
 
 import AllTests
 

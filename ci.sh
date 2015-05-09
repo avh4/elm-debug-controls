@@ -10,7 +10,7 @@ if [ "$1" == "--clean" ]; then
 fi
 
 if ! npm list | grep " jsdom@"; then
-  npm install jsdom
+  npm install jsdom@3
 fi
 
 mkdir -p build

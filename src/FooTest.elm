@@ -1,7 +1,7 @@
 module FooTest where
 
-import ElmTest.Assertion (..)
-import ElmTest.Test (..)
+import ElmTest.Assertion exposing (..)
+import ElmTest.Test exposing (..)
 
 suite = Suite "Foo"
   [ test "is true" <|
