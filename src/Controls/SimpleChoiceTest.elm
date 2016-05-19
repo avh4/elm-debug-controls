@@ -24,10 +24,8 @@ all =
             |> assertEqual
                 (Html.div []
                     [ Html.select []
-                        [ Html.option []
-                            [ Html.text "YES"
-                            , Html.text "NO"
-                            ]
+                        [ Html.option [] [ Html.text "YES" ]
+                        , Html.option [] [ Html.text "NO" ]
                         ]
                     ]
                 )

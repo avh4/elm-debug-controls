@@ -68,12 +68,12 @@ view (Model { currentValue, definition }) =
             Choice first rest ->
                 let
                     option ( label, value ) =
-                        Html.text label
+                        Html.option []
+                            [ Html.text label
+                            ]
                 in
                     Html.select []
-                        [ Html.option []
-                            (List.map option (first :: rest))
-                        ]
+                        (List.map option (first :: rest))
 
             Value _ view ->
                 view currentValue
