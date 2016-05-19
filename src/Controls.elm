@@ -1,25 +1,46 @@
-module Controls exposing (choice, init, currentValue, view)
+module Controls
+    exposing
+        ( string
+        , choice
+        , init
+        , currentValue
+        , view
+        )
 
 import Html exposing (Html)
+import Html.Attributes as Html
 
 
-type Definition a
+type Definition a msg
     = Choice ( String, a ) (List ( String, a ))
+    | Value a (a -> Html msg)
 
 
-type Model a
+type Model a msg
     = Model
         { currentValue : a
-        , definition : Definition a
+        , definition : Definition a msg
         }
 
 
-choice : ( String, a ) -> List ( String, a ) -> Definition a
+string : String -> Definition String msg
+string initial =
+    let
+        view value =
+            Html.input
+                [ Html.value "default"
+                ]
+                []
+    in
+        Value initial view
+
+
+choice : ( String, a ) -> List ( String, a ) -> Definition a msg
 choice =
     Choice
 
 
-init : Definition a -> Model a
+init : Definition a msg -> Model a msg
 init def =
     case def of
         Choice ( _, initial ) _ ->
@@ -28,13 +49,19 @@ init def =
                 , definition = def
                 }
 
+        Value initial _ ->
+            Model
+                { currentValue = initial
+                , definition = def
+                }
 
-currentValue : Model a -> a
+
+currentValue : Model a msg -> a
 currentValue (Model { currentValue }) =
     currentValue
 
 
-view : Model a -> Html msg
+view : Model a msg -> Html msg
 view (Model { currentValue, definition }) =
     Html.div []
         [ case definition of
@@ -47,4 +74,7 @@ view (Model { currentValue, definition }) =
                         [ Html.option []
                             (List.map option (first :: rest))
                         ]
+
+            Value _ view ->
+                view currentValue
         ]
