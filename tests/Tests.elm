@@ -1,11 +1,11 @@
 module Tests exposing (..)
 
 import ElmTest exposing (..)
-import FooTest
+import Controls.SimpleChoiceTest
 
 
 all : Test
 all =
     suite "elm-debug-controls"
-        [ FooTest.all
+        [ Controls.SimpleChoiceTest.all
         ]
