@@ -1,5 +1,7 @@
-module Main where
+module Main exposing (..)
 
 import Html
 
-main = Html.text "Hello world"
+
+main =
+    Html.text "Hello world"

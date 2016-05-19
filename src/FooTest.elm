@@ -1,11 +1,12 @@
-module FooTest where
+module FooTest exposing (..)
 
-import ElmTest.Assertion exposing (..)
-import ElmTest.Test exposing (..)
+import ElmTest exposing (..)
 
-suite = Suite "Foo"
-  [ test "is true" <|
-      1
-      `assertEqual`
-      1
-  ]
+
+all : Test
+all =
+    suite "Foo"
+        [ test "is true"
+            <| assertEqual 1
+            <| 1
+        ]

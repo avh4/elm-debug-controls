@@ -1,6 +1,6 @@
 {
   "commands": {
     "run": "elm-reactor",
-    "test": "./ci.sh"
+    "test": "./run-tests.sh"
   }
 }
