@@ -1,3 +1,9 @@
-To use the archetype, 
+## Running the app
 
-    bash <(curl http://archetypes.github.io/bootstrap.sh) archetypes/elm
+    PORT=8001
+    elm-reactor -p $PORT
+    open http://localhost:$PORT/src/Main.elm
+
+## Running tests
+
+    ./ci.sh

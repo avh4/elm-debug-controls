@@ -6,6 +6,6 @@ import FooTest
 
 all : Test
 all =
-    suite "{{ project }}"
+    suite "elm-debug-controls"
         [ FooTest.all
         ]
