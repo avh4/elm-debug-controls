@@ -53,4 +53,12 @@ all =
           --             ]
           --         )
           --     |> test "Renders all options"
+        , maybeControls
+            |> Controls.allValues
+            |> assertEqual
+                [ Just Monkey
+                , Just Giraffe
+                , Nothing
+                ]
+            |> test "allValues"
         ]

@@ -39,14 +39,27 @@ def3 =
         ]
 
 
+view model =
+    let
+        h title =
+            Html.h2 [] [ Html.text title ]
+
+        showData data =
+            Html.pre [] [ Html.text (toString data) ]
+    in
+        Html.div []
+            [ h "Interactive control"
+            , Controls.view model
+            , showData (Controls.currentValue model)
+            , h "All possible values"
+            , List.map showData (Controls.allValues model)
+                |> Html.div []
+            ]
+
+
 main =
     Html.App.beginnerProgram
         { model = def3
-        , view =
-            \model ->
-                Html.div []
-                    [ Controls.view model
-                    , Html.pre [] [ Html.text (toString <| Controls.currentValue model) ]
-                    ]
+        , view = view
         , update = always
         }
