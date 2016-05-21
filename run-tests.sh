@@ -5,6 +5,7 @@ set -ex
 if [ "$1" == "--clean" ]; then
   rm -Rf elm-stuff/build-artifacts
   rm -Rf tests/elm-stuff/build-artifacts
+  rm -Rf examples/elm-stuff/build-artifacts
 fi
 
 elm-make --yes

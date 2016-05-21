@@ -7,8 +7,10 @@ import Html.Attributes as Html
 
 
 yesNoControls =
-    Controls.choice ( "YES", Controls.value True )
-        [ ( "NO", Controls.value False ) ]
+    Controls.choice
+        [ ( "YES", Controls.value True )
+        , ( "NO", Controls.value False )
+        ]
 
 
 all : Test

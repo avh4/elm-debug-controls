@@ -32,16 +32,18 @@ string initial =
     Text initial identity
 
 
-choice :
-    ( String, Control a )
-    -> List ( String, Control a )
-    -> Control a
-choice current right =
-    Choice
-        { left = []
-        , current = current
-        , right = right
-        }
+choice : List ( String, Control a ) -> Control a
+choice choices =
+    case choices of
+        [] ->
+            Debug.crash "No choices given"
+
+        first :: rest ->
+            Choice
+                { left = []
+                , current = first
+                , right = rest
+                }
 
 
 map : (a -> b) -> Control a -> Control b

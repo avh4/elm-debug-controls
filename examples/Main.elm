@@ -14,20 +14,22 @@ def1 =
 
 
 def2 =
-    Controls.choice ( "YES", Controls.value True )
-        [ ( "NO", Controls.value False )
+    Controls.choice
+        [ ( "YES", Controls.value True )
+        , ( "NO", Controls.value False )
         ]
 
 
 def3 =
     Controls.choice
-        ( "Animal"
-        , Controls.map Just
-            <| Controls.choice ( "Monkey", Controls.value Monkey )
-                [ ( "Giraffe", Controls.value Giraffe )
-                ]
-        )
-        [ ( "---", Controls.value Nothing )
+        [ ( "Animal"
+          , Controls.map Just
+                <| Controls.choice
+                    [ ( "Monkey", Controls.value Monkey )
+                    , ( "Giraffe", Controls.value Giraffe )
+                    ]
+          )
+        , ( "---", Controls.value Nothing )
         ]
 
 
