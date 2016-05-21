@@ -10,6 +10,9 @@ module Controls
 
 import Html exposing (Html)
 import Html.Attributes as Html
+import Html.Events as Html
+import Html.App as Html
+import Json.Decode
 
 
 type Control a
@@ -80,7 +83,7 @@ currentValue control =
             currentValue (snd current)
 
 
-view : Control a -> Html a
+view : Control a -> Html (Control a)
 view control =
     Html.div []
         [ case control of
@@ -90,15 +93,52 @@ view control =
                         Html.option [ Html.selected selected ]
                             [ Html.text label
                             ]
+
+                    selectNew i =
+                        let
+                            _ =
+                                Debug.log "i" i
+
+                            all =
+                                (List.reverse left)
+                                    ++ [ current ]
+                                    ++ right
+                                    |> Debug.log "all"
+                        in
+                            Choice
+                                { left =
+                                    all
+                                        |> List.take i
+                                        |> List.reverse
+                                , current =
+                                    all
+                                        |> List.drop i
+                                        |> List.head
+                                        |> Maybe.withDefault current
+                                , right =
+                                    all
+                                        |> List.drop (i + 1)
+                                }
+
+                    updateChild new =
+                        Choice
+                            { left = left
+                            , current = ( fst current, new )
+                            , right = right
+                            }
                 in
                     Html.div []
-                        [ Html.select []
+                        [ Html.map selectNew
+                            <| Html.select
+                                [ Html.on "change" (Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int)
+                                ]
                             <| List.concat
                                 [ List.map (option False) <| List.reverse left
                                 , [ option True current ]
                                 , List.map (option False) right
                                 ]
-                        , view (snd current)
+                        , Html.map updateChild
+                            <| view (snd current)
                         ]
 
             Text _ fn ->

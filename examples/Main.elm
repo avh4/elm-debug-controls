@@ -1,12 +1,14 @@
 module Main exposing (..)
 
 import Html
+import Html.App
 import Controls
 
 
 type Animal
     = Monkey
     | Giraffe
+    | CustomAnimal String
 
 
 def1 =
@@ -29,10 +31,22 @@ def3 =
                     , ( "Giraffe", Controls.value Giraffe )
                     ]
           )
-        , ( "---", Controls.value Nothing )
+        , ( "Nothing", Controls.value Nothing )
+        , ( "Custom"
+          , Controls.map (Just << CustomAnimal)
+                <| Controls.string ""
+          )
         ]
 
 
 main =
-    def3
-        |> Controls.view
+    Html.App.beginnerProgram
+        { model = def3
+        , view =
+            \model ->
+                Html.div []
+                    [ Controls.view model
+                    , Html.pre [] [ Html.text (toString <| Controls.currentValue model) ]
+                    ]
+        , update = \msg _ -> Debug.log "x" msg
+        }
