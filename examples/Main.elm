@@ -131,6 +131,9 @@ view model =
             , h "All possible values"
             , List.map showData (Controls.allValues model)
                 |> Html.div []
+            , Html.hr [] []
+            , Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/blob/master/examples/LICENSE.md#images" ]
+                [ Html.text "Image credits" ]
             ]
 
 
