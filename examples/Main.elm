@@ -34,7 +34,7 @@ def3 =
         , ( "Nothing", Controls.value Nothing )
         , ( "Custom"
           , Controls.map (Just << CustomAnimal)
-                <| Controls.string ""
+                <| Controls.string "Zebra"
           )
         ]
 
