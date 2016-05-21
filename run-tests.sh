@@ -12,3 +12,6 @@ elm-make --yes
 cd tests
 elm-make TestRunner.elm --output tests.js
 node tests.js
+
+cd ../examples
+elm-make --yes Main.elm

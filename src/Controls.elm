@@ -1,8 +1,9 @@
 module Controls
     exposing
-        ( string
+        ( value
+        , string
         , choice
-        , init
+        , map
         , currentValue
         , view
         )
@@ -11,70 +12,99 @@ import Html exposing (Html)
 import Html.Attributes as Html
 
 
-type Definition a msg
-    = Choice ( String, a ) (List ( String, a ))
-    | Value a (a -> Html msg)
-
-
-type Model a msg
-    = Model
-        { currentValue : a
-        , definition : Definition a msg
+type Control a
+    = Value a
+    | Text String (String -> a)
+    | Choice
+        { left : List ( String, Control a )
+        , current : ( String, Control a )
+        , right : List ( String, Control a )
         }
 
 
-string : String -> Definition String msg
+value : a -> Control a
+value initial =
+    Value initial
+
+
+string : String -> Control String
 string initial =
-    let
-        view value =
-            Html.input
-                [ Html.value "default"
-                ]
-                []
-    in
-        Value initial view
+    Text initial identity
 
 
-choice : ( String, a ) -> List ( String, a ) -> Definition a msg
-choice =
+choice :
+    ( String, Control a )
+    -> List ( String, Control a )
+    -> Control a
+choice current right =
     Choice
+        { left = []
+        , current = current
+        , right = right
+        }
 
 
-init : Definition a msg -> Model a msg
-init def =
-    case def of
-        Choice ( _, initial ) _ ->
-            Model
-                { currentValue = initial
-                , definition = def
-                }
+map : (a -> b) -> Control a -> Control b
+map fn source =
+    let
+        mapTuple ( label, value ) =
+            ( label, map fn value )
+    in
+        case source of
+            Choice { left, current, right } ->
+                Choice
+                    { left = List.map mapTuple left
+                    , current = mapTuple current
+                    , right = List.map mapTuple right
+                    }
 
-        Value initial _ ->
-            Model
-                { currentValue = initial
-                , definition = def
-                }
+            Text initial fn0 ->
+                Text initial (fn0 >> fn)
+
+            Value initial ->
+                Value (fn initial)
 
 
-currentValue : Model a msg -> a
-currentValue (Model { currentValue }) =
-    currentValue
+currentValue : Control a -> a
+currentValue control =
+    case control of
+        Value current ->
+            current
+
+        Text current fn ->
+            fn current
+
+        Choice { current } ->
+            currentValue (snd current)
 
 
-view : Model a msg -> Html msg
-view (Model { currentValue, definition }) =
+view : Control a -> Html a
+view control =
     Html.div []
-        [ case definition of
-            Choice first rest ->
+        [ case control of
+            Choice { left, current, right } ->
                 let
-                    option ( label, value ) =
-                        Html.option []
+                    option selected ( label, value ) =
+                        Html.option [ Html.selected selected ]
                             [ Html.text label
                             ]
                 in
-                    Html.select []
-                        (List.map option (first :: rest))
+                    Html.div []
+                        [ Html.select []
+                            <| List.concat
+                                [ List.map (option False) <| List.reverse left
+                                , [ option True current ]
+                                , List.map (option False) right
+                                ]
+                        , view (snd current)
+                        ]
 
-            Value _ view ->
-                view currentValue
+            Text _ fn ->
+                Html.input
+                    [ Html.value "default"
+                    ]
+                    []
+
+            Value _ ->
+                Html.text ""
         ]

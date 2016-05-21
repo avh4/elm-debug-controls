@@ -4,17 +4,33 @@ import Html
 import Controls
 
 
+type Animal
+    = Monkey
+    | Giraffe
+
+
 def1 =
     Controls.string "default value"
 
 
 def2 =
-    Controls.choice ( "YES", True )
-        [ ( "NO", False )
+    Controls.choice ( "YES", Controls.value True )
+        [ ( "NO", Controls.value False )
+        ]
+
+
+def3 =
+    Controls.choice
+        ( "Animal"
+        , Controls.map Just
+            <| Controls.choice ( "Monkey", Controls.value Monkey )
+                [ ( "Giraffe", Controls.value Giraffe )
+                ]
+        )
+        [ ( "---", Controls.value Nothing )
         ]
 
 
 main =
-    def2
-        |> Controls.init
+    def3
         |> Controls.view
