@@ -17,7 +17,7 @@ import Json.Decode
 
 type Control a
     = Value a
-    | Text String (String -> a)
+    | Text (String -> a) String
     | Choice
         { left : List ( String, Control a )
         , current : ( String, Control a )
@@ -32,7 +32,7 @@ value initial =
 
 string : String -> Control String
 string initial =
-    Text initial identity
+    Text identity initial
 
 
 choice : List ( String, Control a ) -> Control a
@@ -63,8 +63,8 @@ map fn source =
                     , right = List.map mapTuple right
                     }
 
-            Text initial fn0 ->
-                Text initial (fn0 >> fn)
+            Text fn0 initial ->
+                Text (fn0 >> fn) initial
 
             Value initial ->
                 Value (fn initial)
@@ -76,7 +76,7 @@ currentValue control =
         Value current ->
             current
 
-        Text current fn ->
+        Text fn current ->
             fn current
 
         Choice { current } ->
@@ -96,14 +96,10 @@ view control =
 
                     selectNew i =
                         let
-                            _ =
-                                Debug.log "i" i
-
                             all =
                                 (List.reverse left)
                                     ++ [ current ]
                                     ++ right
-                                    |> Debug.log "all"
                         in
                             Choice
                                 { left =
@@ -141,9 +137,10 @@ view control =
                             <| view (snd current)
                         ]
 
-            Text _ fn ->
+            Text fn text ->
                 Html.input
-                    [ Html.value "default"
+                    [ Html.value text
+                    , Html.onInput (Text fn)
                     ]
                     []
 

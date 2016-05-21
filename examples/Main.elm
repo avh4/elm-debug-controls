@@ -48,5 +48,5 @@ main =
                     [ Controls.view model
                     , Html.pre [] [ Html.text (toString <| Controls.currentValue model) ]
                     ]
-        , update = \msg _ -> Debug.log "x" msg
+        , update = always
         }
