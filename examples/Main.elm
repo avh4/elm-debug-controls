@@ -3,7 +3,7 @@ module Main exposing (..)
 import Html
 import Html.Attributes as Html
 import Html.App
-import Controls exposing (choice, string, value, values, list)
+import Controls exposing (choice, string, value, values, list, map)
 import String
 
 
@@ -29,24 +29,12 @@ def2 =
 def3 =
     let
         basicAnimal =
-            values
-                [ Monkey
-                , Giraffe
-                , Eagle
-                ]
+            values [ Monkey, Giraffe, Eagle ]
     in
         choice
-            [ ( "Animal"
-              , Controls.map Just basicAnimal
-              )
-            , ( "Chimera"
-              , Controls.map (Just << Chimera)
-                    <| list basicAnimal
-              )
-            , ( "Custom"
-              , Controls.map (Just << CustomAnimal)
-                    <| string "Zebra"
-              )
+            [ ( "Animal", map Just basicAnimal )
+            , ( "Chimera", map (Just << Chimera) (list basicAnimal) )
+            , ( "Custom", map (Just << CustomAnimal) (string "Zebra") )
             , ( "Nothing", value Nothing )
             ]
 
@@ -136,7 +124,8 @@ view model =
                 ]
     in
         Html.div [ Html.style [ ( "padding", "24px" ) ] ]
-            [ h "Interactive control"
+            [ Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/" ] [ Html.text "https://github.com/avh4/elm-debug-controls/" ]
+            , h "Interactive control"
             , Controls.view model
             , showData (Controls.currentValue model)
             , h "All possible values"
