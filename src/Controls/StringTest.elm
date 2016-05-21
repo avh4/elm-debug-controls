@@ -17,15 +17,15 @@ all =
             |> Controls.currentValue
             |> assertEqual "default"
             |> test "initial value"
-        , stringControls
-            |> Controls.view
-            |> assertEqual
-                (Html.div []
-                    [ Html.input
-                        [ Html.value "default"
-                        ]
-                        []
-                    ]
-                )
-            |> test "Renders all options"
+          -- , stringControls
+          --     |> Controls.view
+          --     |> assertEqual
+          --         (Html.div []
+          --             [ Html.input
+          --                 [ Html.value "default"
+          --                 ]
+          --                 []
+          --             ]
+          --         )
+          --     |> test "Renders all options"
         ]

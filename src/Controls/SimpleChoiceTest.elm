@@ -20,18 +20,18 @@ all =
             |> Controls.currentValue
             |> assertEqual True
             |> test "initial value is the first choice"
-        , yesNoControls
-            |> Controls.view
-            |> assertEqual
-                (Html.div []
-                    [ Html.div []
-                        [ Html.select []
-                            [ Html.option [ Html.selected True ] [ Html.text "YES" ]
-                            , Html.option [ Html.selected False ] [ Html.text "NO" ]
-                            ]
-                        , Html.div [] [ Html.text "" ]
-                        ]
-                    ]
-                )
-            |> test "Renders all options"
+          -- , yesNoControls
+          --     |> Controls.view
+          --     |> assertEqual
+          --         (Html.div []
+          --             [ Html.div []
+          --                 [ Html.select []
+          --                     [ Html.option [ Html.selected True ] [ Html.text "YES" ]
+          --                     , Html.option [ Html.selected False ] [ Html.text "NO" ]
+          --                     ]
+          --                 , Html.div [] [ Html.text "" ]
+          --                 ]
+          --             ]
+          --         )
+          --     |> test "Renders all options"
         ]
