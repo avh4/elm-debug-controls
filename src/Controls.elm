@@ -1,8 +1,10 @@
 module Controls
     exposing
         ( value
+        , values
         , string
         , choice
+        , list
         , map
         , currentValue
         , allValues
@@ -14,6 +16,7 @@ import Html.Attributes as Html
 import Html.Events as Html
 import Html.App as Html
 import Json.Decode
+import String
 
 
 type Control a
@@ -24,11 +27,17 @@ type Control a
         , current : ( String, Control a )
         , right : List ( String, Control a )
         }
+    | Slider (Int -> a) Int { min : Int, max : Int }
 
 
 value : a -> Control a
 value initial =
     Value initial
+
+
+values : List a -> Control a
+values choices =
+    choice (List.map (\x -> ( toString x, value x )) choices)
 
 
 string : String -> Control String
@@ -50,6 +59,18 @@ choice choices =
                 }
 
 
+list : Control a -> Control (List a)
+list itemControl =
+    let
+        makeList n =
+            allValues itemControl
+                |> List.repeat n
+                |> List.concat
+                |> List.take n
+    in
+        Slider makeList 1 { min = 0, max = 10 }
+
+
 map : (a -> b) -> Control a -> Control b
 map fn source =
     let
@@ -64,11 +85,14 @@ map fn source =
                     , right = List.map mapTuple right
                     }
 
-            Text fn0 initial ->
-                Text (fn0 >> fn) initial
+            Text fn0 current ->
+                Text (fn0 >> fn) current
 
-            Value initial ->
-                Value (fn initial)
+            Value current ->
+                Value (fn current)
+
+            Slider fn0 current range ->
+                Slider (fn0 >> fn) current range
 
 
 currentValue : Control a -> a
@@ -82,6 +106,9 @@ currentValue control =
 
         Choice { current } ->
             currentValue (snd current)
+
+        Slider fn current _ ->
+            fn current
 
 
 allValues : Control a -> List a
@@ -102,6 +129,13 @@ allValues control =
             (List.reverse left ++ [ current ] ++ right)
                 |> List.map (snd >> allValues)
                 |> List.concat
+
+        Slider fn _ _ ->
+            -- TODO: use min/max
+            [ fn 1
+            , fn 0
+            , fn 3
+            ]
 
 
 view : Control a -> Html (Control a)
@@ -167,4 +201,30 @@ view control =
 
             Value _ ->
                 Html.text ""
+
+            Slider fn current range ->
+                let
+                    selectNew new =
+                        Slider fn
+                            new
+                            range
+                in
+                    Html.map
+                        (String.toInt
+                            >> Result.toMaybe
+                            >> Maybe.withDefault 1
+                            >> selectNew
+                        )
+                        <| Html.label []
+                            [ Html.text ""
+                            , Html.input
+                                [ Html.type' "range"
+                                , Html.min <| toString range.min
+                                , Html.max <| toString range.max
+                                , Html.step <| toString 1
+                                , Html.attribute "value" <| toString current
+                                , Html.on "input" Html.targetValue
+                                ]
+                                []
+                            ]
         ]

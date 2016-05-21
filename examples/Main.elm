@@ -2,12 +2,14 @@ module Main exposing (..)
 
 import Html
 import Html.App
-import Controls exposing (choice, string, value)
+import Controls exposing (choice, string, value, values, list)
 
 
 type Animal
     = Monkey
     | Giraffe
+    | Eagle
+    | Chimera (List Animal)
     | CustomAnimal String
 
 
@@ -23,20 +25,28 @@ def2 =
 
 
 def3 =
-    choice
-        [ ( "Animal"
-          , Controls.map Just
-                <| choice
-                    [ ( "Monkey", value Monkey )
-                    , ( "Giraffe", value Giraffe )
-                    ]
-          )
-        , ( "Nothing", value Nothing )
-        , ( "Custom"
-          , Controls.map (Just << CustomAnimal)
-                <| string "Zebra"
-          )
-        ]
+    let
+        basicAnimal =
+            values
+                [ Monkey
+                , Giraffe
+                , Eagle
+                ]
+    in
+        choice
+            [ ( "Animal"
+              , Controls.map Just basicAnimal
+              )
+            , ( "Chimera"
+              , Controls.map (Just << Chimera)
+                    <| list basicAnimal
+              )
+            , ( "Custom"
+              , Controls.map (Just << CustomAnimal)
+                    <| string "Zebra"
+              )
+            , ( "Nothing", value Nothing )
+            ]
 
 
 view model =
