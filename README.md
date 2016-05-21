@@ -2,6 +2,8 @@
 Here's an example of defining a control for a complicated `Maybe Animal` data type:
 
 ```elm
+import Controls exposing (Control, values, map, list, string, value)
+
 type Animal
     = Monkey
     | Giraffe
