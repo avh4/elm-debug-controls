@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html
 import Html.App
-import Controls
+import Controls exposing (choice, string, value)
 
 
 type Animal
@@ -12,29 +12,29 @@ type Animal
 
 
 def1 =
-    Controls.string "default value"
+    string "default value"
 
 
 def2 =
-    Controls.choice
-        [ ( "YES", Controls.value True )
-        , ( "NO", Controls.value False )
+    choice
+        [ ( "YES", value True )
+        , ( "NO", value False )
         ]
 
 
 def3 =
-    Controls.choice
+    choice
         [ ( "Animal"
           , Controls.map Just
-                <| Controls.choice
-                    [ ( "Monkey", Controls.value Monkey )
-                    , ( "Giraffe", Controls.value Giraffe )
+                <| choice
+                    [ ( "Monkey", value Monkey )
+                    , ( "Giraffe", value Giraffe )
                     ]
           )
-        , ( "Nothing", Controls.value Nothing )
+        , ( "Nothing", value Nothing )
         , ( "Custom"
           , Controls.map (Just << CustomAnimal)
-                <| Controls.string "Zebra"
+                <| string "Zebra"
           )
         ]
 
