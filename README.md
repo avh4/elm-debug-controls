@@ -1,5 +1,5 @@
 
-Here's an example of defining a control for a complicated `Animal` data type:
+Here's an example of defining a control for a complicated `Maybe Animal` data type:
 
 ```elm
 type Animal
@@ -9,6 +9,7 @@ type Animal
     | Chimera (List Animal)
     | CustomAnimal String
 
+debugControl : Control (Maybe Animal)
 debugControl =
     let
         basicAnimal =
@@ -25,6 +26,7 @@ debugControl =
 You can now use `debugControl` to create an interactve control the generate data, or to create an exhaustive list of all possible data.  You can see what this looks like at http://avh4.github.io/elm-debug-controls/examples/
 
 ```elm
+view : Control (Maybe Animal) -> Html (Control (Maybe Animal))
 view control =
     Html.div []
         [ -- Interactive control
@@ -35,6 +37,7 @@ view control =
             |> Html.div []
         ]
 
+main : Program Never
 main =
     Html.App.beginnerProgram
         { model = debugControl
