@@ -130,12 +130,11 @@ allValues control =
                 |> List.map (snd >> allValues)
                 |> List.concat
 
-        Slider fn _ _ ->
-            -- TODO: use min/max
-            [ fn 1
-            , fn 0
-            , fn 3
-            ]
+        Slider fn _ { min, max } ->
+            [ 1, 0, 3 ]
+                |> List.filter (\x -> x > min && x < max)
+                |> flip List.append [ min, max ]
+                |> List.map fn
 
 
 view : Control a -> Html (Control a)
