@@ -14,8 +14,8 @@ type Animal
 maybeControls =
     Controls.choice
         [ ( "Animal"
-          , Controls.map Just
-                <| Controls.choice
+          , Controls.map Just <|
+                Controls.choice
                     [ ( "Monkey", Controls.value Monkey )
                     , ( "Giraffe", Controls.value Giraffe )
                     ]

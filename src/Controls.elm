@@ -178,17 +178,18 @@ view control =
                             }
                 in
                     Html.div []
-                        [ Html.map selectNew
-                            <| Html.select
+                        [ Html.map selectNew <|
+                            Html.select
                                 [ Html.on "change" (Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int)
                                 ]
-                            <| List.concat
-                                [ List.map (option False) <| List.reverse left
-                                , [ option True current ]
-                                , List.map (option False) right
-                                ]
-                        , Html.map updateChild
-                            <| view (snd current)
+                            <|
+                                List.concat
+                                    [ List.map (option False) <| List.reverse left
+                                    , [ option True current ]
+                                    , List.map (option False) right
+                                    ]
+                        , Html.map updateChild <|
+                            view (snd current)
                         ]
 
             Text fn text ->
@@ -214,7 +215,8 @@ view control =
                             >> Maybe.withDefault 1
                             >> selectNew
                         )
-                        <| Html.label []
+                    <|
+                        Html.label []
                             [ Html.text ""
                             , Html.input
                                 [ Html.type' "range"
