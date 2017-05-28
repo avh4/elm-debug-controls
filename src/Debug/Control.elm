@@ -262,10 +262,14 @@ field name (Control value) (Control pipeline) =
         , view =
             \() ->
                 Html.div []
-                    [ Html.text name
-                    , Html.text "="
-                    , Html.map (map pipeline.currentValue) <|
-                        value.view ()
+                    [ Html.map (field name (Control value)) <|
+                        pipeline.view ()
+                    , Html.div []
+                        [ Html.text name
+                        , Html.text " = "
+                        , Html.map (\v -> field name v (Control pipeline)) <|
+                            value.view ()
+                        ]
                     ]
         }
 
