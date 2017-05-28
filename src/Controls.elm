@@ -20,19 +20,20 @@ import String
 
 
 type Control a
-    = Value a
-    | Text (String -> a) String
-    | Choice
-        { left : List ( String, Control a )
-        , current : ( String, Control a )
-        , right : List ( String, Control a )
+    = Control
+        { currentValue : a
+        , allValues : () -> List a
+        , view : () -> Html (Control a)
         }
-    | Slider (Int -> a) Int { min : Int, max : Int }
 
 
 value : a -> Control a
 value initial =
-    Value initial
+    Control
+        { currentValue = initial
+        , allValues = \() -> [ initial ]
+        , view = \() -> Html.text ""
+        }
 
 
 values : List a -> Control a
@@ -41,8 +42,25 @@ values choices =
 
 
 string : String -> Control String
-string initial =
-    Text identity initial
+string value =
+    Control
+        { currentValue = value
+        , allValues =
+            \() ->
+                [ value
+                , ""
+                , "short"
+                , "Longwordyesverylongwithnospacessupercalifragilisticexpialidocious"
+                , "Long text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                ]
+        , view =
+            \() ->
+                Html.input
+                    [ Html.value value
+                    , Html.onInput string
+                    ]
+                    []
+        }
 
 
 choice : List ( String, Control a ) -> Control a
@@ -52,96 +70,24 @@ choice choices =
             Debug.crash "No choices given"
 
         first :: rest ->
-            Choice
-                { left = []
-                , current = first
-                , right = rest
-                }
+            choice' [] first rest
 
 
-list : Control a -> Control (List a)
-list itemControl =
-    let
-        makeList n =
-            allValues itemControl
-                |> List.repeat n
-                |> List.concat
-                |> List.take n
-    in
-        Slider makeList 1 { min = 0, max = 10 }
-
-
-map : (a -> b) -> Control a -> Control b
-map fn source =
-    let
-        mapTuple ( label, value ) =
-            ( label, map fn value )
-    in
-        case source of
-            Choice { left, current, right } ->
-                Choice
-                    { left = List.map mapTuple left
-                    , current = mapTuple current
-                    , right = List.map mapTuple right
-                    }
-
-            Text fn0 current ->
-                Text (fn0 >> fn) current
-
-            Value current ->
-                Value (fn current)
-
-            Slider fn0 current range ->
-                Slider (fn0 >> fn) current range
-
-
-currentValue : Control a -> a
-currentValue control =
-    case control of
-        Value current ->
-            current
-
-        Text fn current ->
-            fn current
-
-        Choice { current } ->
-            currentValue (snd current)
-
-        Slider fn current _ ->
-            fn current
-
-
-allValues : Control a -> List a
-allValues control =
-    case control of
-        Value current ->
-            [ current ]
-
-        Text fn current ->
-            [ fn current
-            , fn ""
-            , fn "short"
-            , fn "Longwordyesverylongwithnospacessupercalifragilisticexpialidocious"
-            , fn "Long text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-            ]
-
-        Choice { left, current, right } ->
-            (List.reverse left ++ [ current ] ++ right)
-                |> List.map (snd >> allValues)
-                |> List.concat
-
-        Slider fn _ { min, max } ->
-            [ 1, 0, 3 ]
-                |> List.filter (\x -> x > min && x < max)
-                |> flip List.append [ min, max ]
-                |> List.map fn
-
-
-view : Control a -> Html (Control a)
-view control =
-    Html.div []
-        [ case control of
-            Choice { left, current, right } ->
+choice' :
+    List ( String, Control a )
+    -> ( String, Control a )
+    -> List ( String, Control a )
+    -> Control a
+choice' left current right =
+    Control
+        { currentValue = current |> snd |> currentValue
+        , allValues =
+            \() ->
+                (List.reverse left ++ [ current ] ++ right)
+                    |> List.map (snd >> allValues)
+                    |> List.concat
+        , view =
+            \() ->
                 let
                     option selected ( label, value ) =
                         Html.option [ Html.selected selected ]
@@ -154,28 +100,26 @@ view control =
                                 (List.reverse left)
                                     ++ [ current ]
                                     ++ right
+
+                            left' =
+                                all
+                                    |> List.take i
+                                    |> List.reverse
+
+                            current' =
+                                all
+                                    |> List.drop i
+                                    |> List.head
+                                    |> Maybe.withDefault current
+
+                            right' =
+                                all
+                                    |> List.drop (i + 1)
                         in
-                            Choice
-                                { left =
-                                    all
-                                        |> List.take i
-                                        |> List.reverse
-                                , current =
-                                    all
-                                        |> List.drop i
-                                        |> List.head
-                                        |> Maybe.withDefault current
-                                , right =
-                                    all
-                                        |> List.drop (i + 1)
-                                }
+                            choice' left' current' right' |> Debug.log "new"
 
                     updateChild new =
-                        Choice
-                            { left = left
-                            , current = ( fst current, new )
-                            , right = right
-                            }
+                        choice' left ( fst current, new ) right
                 in
                     Html.div []
                         [ Html.map selectNew
@@ -190,40 +134,81 @@ view control =
                         , Html.map updateChild
                             <| view (snd current)
                         ]
+        }
 
-            Text fn text ->
-                Html.input
-                    [ Html.value text
-                    , Html.onInput (Text fn)
-                    ]
-                    []
 
-            Value _ ->
-                Html.text ""
+list : Control a -> Control (List a)
+list itemControl =
+    list' itemControl 1 0 10
 
-            Slider fn current range ->
-                let
-                    selectNew new =
-                        Slider fn
-                            new
-                            range
-                in
-                    Html.map
-                        (String.toInt
-                            >> Result.toMaybe
-                            >> Maybe.withDefault 1
-                            >> selectNew
-                        )
-                        <| Html.label []
-                            [ Html.text ""
-                            , Html.input
-                                [ Html.type' "range"
-                                , Html.min <| toString range.min
-                                , Html.max <| toString range.max
-                                , Html.step <| toString 1
-                                , Html.attribute "value" <| toString current
-                                , Html.on "input" Html.targetValue
+
+list' : Control a -> Int -> Int -> Int -> Control (List a)
+list' itemControl current min max =
+    let
+        makeList n =
+            allValues itemControl
+                |> List.repeat n
+                |> List.concat
+                |> List.take n
+    in
+        Control
+            { currentValue = makeList current
+            , allValues =
+                \() ->
+                    [ 1, 0, 3 ]
+                        |> List.filter (\x -> x > min && x < max)
+                        |> flip List.append [ min, max ]
+                        |> List.map makeList
+            , view =
+                \() ->
+                    let
+                        selectNew new =
+                            list' itemControl new min max
+                    in
+                        Html.map
+                            (String.toInt
+                                >> Result.toMaybe
+                                >> Maybe.withDefault current
+                                >> selectNew
+                            )
+                            <| Html.label []
+                                [ Html.text ""
+                                , Html.input
+                                    [ Html.type' "range"
+                                    , Html.min <| toString min
+                                    , Html.max <| toString max
+                                    , Html.step <| toString 1
+                                    , Html.attribute "value" <| toString current
+                                    , Html.on "input" Html.targetValue
+                                    ]
+                                    []
                                 ]
-                                []
-                            ]
-        ]
+            }
+
+
+map : (a -> b) -> Control a -> Control b
+map fn (Control { currentValue, allValues, view }) =
+    let
+        mapTuple ( label, value ) =
+            ( label, map fn value )
+    in
+        Control
+            { currentValue = fn currentValue
+            , allValues = \() -> List.map fn (allValues ())
+            , view = \() -> Html.map (map fn) (view ())
+            }
+
+
+currentValue : Control a -> a
+currentValue (Control c) =
+    c.currentValue
+
+
+allValues : Control a -> List a
+allValues (Control c) =
+    c.allValues ()
+
+
+view : Control a -> Html (Control a)
+view (Control c) =
+    c.view ()
