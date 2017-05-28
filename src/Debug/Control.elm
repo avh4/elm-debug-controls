@@ -5,6 +5,7 @@ module Debug.Control
         , bool
         , choice
         , currentValue
+        , date
         , field
         , list
         , map
@@ -17,14 +18,23 @@ module Debug.Control
 
 {-| Create interactive controls for complex data structures.
 
-@docs Control, value, values, bool, string, choice, list, record, field, map
+@docs Control
+@docs value
+@docs bool, string, date
+@docs values, choice, list, record, field
+@docs map
 
 @docs view, currentValue, allValues
 
 -}
 
+import Css
+import Date exposing (Date)
+import DateTimePicker
+import DateTimePicker.Css
 import Html exposing (Html)
 import Html.Attributes
+import Html.CssHelpers
 import Html.Events
 import Json.Decode
 import String
@@ -105,6 +115,38 @@ string value =
                     , Html.Events.onInput string
                     ]
                     []
+        }
+
+
+{-| A `Control` that allows a Date (include date and time) input
+with a date picker.
+-}
+date : Date -> Control Date
+date value =
+    date_ DateTimePicker.initialState value
+
+
+date_ : DateTimePicker.State -> Date -> Control Date
+date_ state value =
+    Control
+        { currentValue = value
+        , allValues = \() -> [ value ] -- TODO
+        , view =
+            \() ->
+                Html.span []
+                    [ DateTimePicker.dateTimePicker
+                        (\newState newDate ->
+                            case newDate of
+                                Nothing ->
+                                    date_ newState value
+
+                                Just d ->
+                                    date_ newState d
+                        )
+                        []
+                        state
+                        (Just value)
+                    ]
         }
 
 
@@ -334,4 +376,10 @@ allValues (Control c) =
 -}
 view : Control a -> Html (Control a)
 view (Control c) =
-    c.view ()
+    Html.div []
+        [ [ DateTimePicker.Css.css ]
+            |> Css.compile
+            |> .css
+            |> Html.CssHelpers.style
+        , c.view ()
+        ]

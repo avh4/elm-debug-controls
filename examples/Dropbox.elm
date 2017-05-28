@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Date exposing (Date)
 import Debug.Control as Control exposing (Control)
 import Html exposing (..)
 
@@ -18,6 +19,7 @@ type alias DownloadRequest =
 type alias UploadRequest =
     { path : String
     , autorename : Bool
+    , clientModified : Date
     , mute : Bool
     , content : String
     }
@@ -32,6 +34,7 @@ init =
         Control.record UploadRequest
             |> Control.field "path" (Control.string "/demo.txt")
             |> Control.field "autorename" (Control.bool False)
+            |> Control.field "clientModified" (Control.date <| Date.fromTime 0)
             |> Control.field "mute" (Control.bool False)
             |> Control.field "content" (Control.string "HELLO.")
     }
