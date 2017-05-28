@@ -9,6 +9,7 @@ module Debug.Control
         , field
         , list
         , map
+        , maybe
         , record
         , string
         , value
@@ -21,7 +22,7 @@ module Debug.Control
 @docs Control
 @docs value
 @docs bool, string, date
-@docs values, choice, list, record, field
+@docs values, maybe, choice, list, record, field
 @docs map
 
 @docs view, currentValue, allValues
@@ -66,6 +67,39 @@ value initial =
 values : List a -> Control a
 values choices =
     choice (List.map (\x -> ( toString x, value x )) choices)
+
+
+{-| A `Control` that wraps another control in a `Maybe`
+-}
+maybe : Bool -> Control a -> Control (Maybe a)
+maybe isJust (Control value) =
+    Control
+        { currentValue =
+            if isJust then
+                Just value.currentValue
+            else
+                Nothing
+        , allValues =
+            \() ->
+                Nothing
+                    :: List.map Just (value.allValues ())
+        , view =
+            \() ->
+                Html.span []
+                    [ Html.input
+                        [ Html.Attributes.type_ "checkbox"
+                        , Html.Events.onCheck (flip maybe (Control value))
+                        , Html.Attributes.checked isJust
+                        ]
+                        []
+                    , Html.text " "
+                    , if isJust then
+                        Html.map (maybe isJust) <|
+                            value.view ()
+                      else
+                        Html.text "Nothing"
+                    ]
+        }
 
 
 {-| A `Control` that toggles a `Bool` with a checkbox
@@ -133,7 +167,10 @@ date_ state value =
         , allValues = \() -> [ value ] -- TODO
         , view =
             \() ->
-                Html.span []
+                Html.span
+                    [ Html.Attributes.style
+                        [ ( "display", "inline-block" ) ]
+                    ]
                     [ DateTimePicker.dateTimePicker
                         (\newState newDate ->
                             case newDate of
