@@ -24,6 +24,7 @@ elm-test
 
 ## examples
 
+mkdir -p docs
 pushd examples
-elm-make --yes Main.elm
+elm-make --yes Main.elm --output ../docs/index.html
 popd
