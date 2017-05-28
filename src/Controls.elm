@@ -1,20 +1,20 @@
 module Controls
     exposing
-        ( value
-        , values
-        , string
+        ( Control
+        , allValues
         , choice
+        , currentValue
         , list
         , map
-        , currentValue
-        , allValues
+        , string
+        , value
+        , values
         , view
         )
 
 import Html exposing (Html)
-import Html.Attributes as Html
-import Html.Events as Html
-import Html.App as Html
+import Html.Attributes
+import Html.Events
 import Json.Decode
 import String
 
@@ -56,8 +56,8 @@ string value =
         , view =
             \() ->
                 Html.input
-                    [ Html.value value
-                    , Html.onInput string
+                    [ Html.Attributes.value value
+                    , Html.Events.onInput string
                     ]
                     []
         }
@@ -70,80 +70,81 @@ choice choices =
             Debug.crash "No choices given"
 
         first :: rest ->
-            choice' [] first rest
+            choice_ [] first rest
 
 
-choice' :
+choice_ :
     List ( String, Control a )
     -> ( String, Control a )
     -> List ( String, Control a )
     -> Control a
-choice' left current right =
+choice_ left current right =
     Control
-        { currentValue = current |> snd |> currentValue
+        { currentValue = current |> Tuple.second |> currentValue
         , allValues =
             \() ->
                 (List.reverse left ++ [ current ] ++ right)
-                    |> List.map (snd >> allValues)
+                    |> List.map (Tuple.second >> allValues)
                     |> List.concat
         , view =
             \() ->
                 let
                     option selected ( label, value ) =
-                        Html.option [ Html.selected selected ]
-                            [ Html.text label
-                            ]
+                        Html.option
+                            [ Html.Attributes.selected selected ]
+                            [ Html.text label ]
 
                     selectNew i =
                         let
                             all =
-                                (List.reverse left)
+                                List.reverse left
                                     ++ [ current ]
                                     ++ right
 
-                            left' =
+                            left_ =
                                 all
                                     |> List.take i
                                     |> List.reverse
 
-                            current' =
+                            current_ =
                                 all
                                     |> List.drop i
                                     |> List.head
                                     |> Maybe.withDefault current
 
-                            right' =
+                            right_ =
                                 all
                                     |> List.drop (i + 1)
                         in
-                            choice' left' current' right' |> Debug.log "new"
+                        choice_ left_ current_ right_ |> Debug.log "new"
 
                     updateChild new =
-                        choice' left ( fst current, new ) right
+                        choice_ left ( Tuple.first current, new ) right
                 in
-                    Html.div []
-                        [ Html.map selectNew
-                            <| Html.select
-                                [ Html.on "change" (Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int)
-                                ]
-                            <| List.concat
+                Html.div []
+                    [ Html.map selectNew <|
+                        Html.select
+                            [ Html.Events.on "change" (Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int)
+                            ]
+                        <|
+                            List.concat
                                 [ List.map (option False) <| List.reverse left
                                 , [ option True current ]
                                 , List.map (option False) right
                                 ]
-                        , Html.map updateChild
-                            <| view (snd current)
-                        ]
+                    , Html.map updateChild <|
+                        view (Tuple.second current)
+                    ]
         }
 
 
 list : Control a -> Control (List a)
 list itemControl =
-    list' itemControl 1 0 10
+    list_ itemControl 1 0 10
 
 
-list' : Control a -> Int -> Int -> Int -> Control (List a)
-list' itemControl current min max =
+list_ : Control a -> Int -> Int -> Int -> Control (List a)
+list_ itemControl current min max =
     let
         makeList n =
             allValues itemControl
@@ -151,39 +152,40 @@ list' itemControl current min max =
                 |> List.concat
                 |> List.take n
     in
-        Control
-            { currentValue = makeList current
-            , allValues =
-                \() ->
-                    [ 1, 0, 3 ]
-                        |> List.filter (\x -> x > min && x < max)
-                        |> flip List.append [ min, max ]
-                        |> List.map makeList
-            , view =
-                \() ->
-                    let
-                        selectNew new =
-                            list' itemControl new min max
-                    in
-                        Html.map
-                            (String.toInt
-                                >> Result.toMaybe
-                                >> Maybe.withDefault current
-                                >> selectNew
-                            )
-                            <| Html.label []
-                                [ Html.text ""
-                                , Html.input
-                                    [ Html.type' "range"
-                                    , Html.min <| toString min
-                                    , Html.max <| toString max
-                                    , Html.step <| toString 1
-                                    , Html.attribute "value" <| toString current
-                                    , Html.on "input" Html.targetValue
-                                    ]
-                                    []
-                                ]
-            }
+    Control
+        { currentValue = makeList current
+        , allValues =
+            \() ->
+                [ 1, 0, 3 ]
+                    |> List.filter (\x -> x > min && x < max)
+                    |> flip List.append [ min, max ]
+                    |> List.map makeList
+        , view =
+            \() ->
+                let
+                    selectNew new =
+                        list_ itemControl new min max
+                in
+                Html.map
+                    (String.toInt
+                        >> Result.toMaybe
+                        >> Maybe.withDefault current
+                        >> selectNew
+                    )
+                <|
+                    Html.label []
+                        [ Html.text ""
+                        , Html.input
+                            [ Html.Attributes.type_ "range"
+                            , Html.Attributes.min <| toString min
+                            , Html.Attributes.max <| toString max
+                            , Html.Attributes.step <| toString 1
+                            , Html.Attributes.attribute "value" <| toString current
+                            , Html.Events.on "input" Html.Events.targetValue
+                            ]
+                            []
+                        ]
+        }
 
 
 map : (a -> b) -> Control a -> Control b
@@ -192,11 +194,11 @@ map fn (Control { currentValue, allValues, view }) =
         mapTuple ( label, value ) =
             ( label, map fn value )
     in
-        Control
-            { currentValue = fn currentValue
-            , allValues = \() -> List.map fn (allValues ())
-            , view = \() -> Html.map (map fn) (view ())
-            }
+    Control
+        { currentValue = fn currentValue
+        , allValues = \() -> List.map fn (allValues ())
+        , view = \() -> Html.map (map fn) (view ())
+        }
 
 
 currentValue : Control a -> a

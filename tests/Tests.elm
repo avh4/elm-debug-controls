@@ -1,15 +1,15 @@
 module Tests exposing (..)
 
-import ElmTest exposing (..)
 import Controls.ComplexChoiceTest
 import Controls.ListTest
 import Controls.SimpleChoiceTest
 import Controls.StringTest
+import Test exposing (..)
 
 
 all : Test
 all =
-    suite "elm-debug-controls"
+    describe "elm-debug-controls"
         [ Controls.ComplexChoiceTest.all
         , Controls.ListTest.all
         , Controls.SimpleChoiceTest.all

@@ -1,9 +1,8 @@
 module Main exposing (..)
 
+import Controls exposing (Control, choice, list, map, string, value, values)
 import Html
 import Html.Attributes as Html
-import Html.App
-import Controls exposing (choice, string, value, values, list, map)
 import String
 
 
@@ -31,12 +30,12 @@ def3 =
         basicAnimal =
             values [ Monkey, Giraffe, Eagle ]
     in
-        choice
-            [ ( "Animal", map Just basicAnimal )
-            , ( "Chimera", map (Just << Chimera) (list basicAnimal) )
-            , ( "Custom", map (Just << CustomAnimal) (string "Zebra") )
-            , ( "Nothing", value Nothing )
-            ]
+    choice
+        [ ( "Animal", map Just basicAnimal )
+        , ( "Chimera", map (Just << Chimera) (list basicAnimal) )
+        , ( "Custom", map (Just << CustomAnimal) (string "Zebra") )
+        , ( "Nothing", value Nothing )
+        ]
 
 
 viewAnimal size animal =
@@ -70,44 +69,44 @@ viewAnimal size animal =
                 ]
                 [ Html.text string ]
     in
-        case animal of
-            Just Monkey ->
-                svg "monkey.svg"
+    case animal of
+        Just Monkey ->
+            svg "monkey.svg"
 
-            Just Giraffe ->
-                svg "giraffe.svg"
+        Just Giraffe ->
+            svg "giraffe.svg"
 
-            Just Eagle ->
-                svg "eagle.svg"
+        Just Eagle ->
+            svg "eagle.svg"
 
-            Just (CustomAnimal name) ->
-                name
-                    |> String.split " "
-                    |> List.map (String.left 1)
-                    |> String.join ""
-                    |> String.toUpper
-                    |> letters "pink" "black"
+        Just (CustomAnimal name) ->
+            name
+                |> String.split " "
+                |> List.map (String.left 1)
+                |> String.join ""
+                |> String.toUpper
+                |> letters "pink" "black"
 
-            Just (Chimera parts) ->
-                let
-                    scale =
-                        List.length parts
-                            |> toFloat
-                            |> sqrt
-                            |> ceiling
-                in
-                    Html.div
-                        [ Html.style
-                            [ ( "width", toString size ++ "px" )
-                            , ( "height", toString size ++ "px" )
-                            , ( "background-color", "lightgreen" )
-                            , ( "line-height", "0" )
-                            ]
-                        ]
-                        (List.map (Just >> viewAnimal (size // scale)) parts)
+        Just (Chimera parts) ->
+            let
+                scale =
+                    List.length parts
+                        |> toFloat
+                        |> sqrt
+                        |> ceiling
+            in
+            Html.div
+                [ Html.style
+                    [ ( "width", toString size ++ "px" )
+                    , ( "height", toString size ++ "px" )
+                    , ( "background-color", "lightgreen" )
+                    , ( "line-height", "0" )
+                    ]
+                ]
+                (List.map (Just >> viewAnimal (size // scale)) parts)
 
-            Nothing ->
-                letters "lightgray" "gray" "N/A"
+        Nothing ->
+            letters "lightgray" "gray" "N/A"
 
 
 view model =
@@ -123,22 +122,22 @@ view model =
                     ]
                 ]
     in
-        Html.div [ Html.style [ ( "padding", "24px" ) ] ]
-            [ Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/" ] [ Html.text "https://github.com/avh4/elm-debug-controls/" ]
-            , h "Interactive control"
-            , Controls.view model
-            , showData (Controls.currentValue model)
-            , h "All possible values"
-            , List.map showData (Controls.allValues model)
-                |> Html.div []
-            , Html.hr [] []
-            , Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/blob/master/examples/LICENSE.md#images" ]
-                [ Html.text "Image credits" ]
-            ]
+    Html.div [ Html.style [ ( "padding", "24px" ) ] ]
+        [ Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/" ] [ Html.text "https://github.com/avh4/elm-debug-controls/" ]
+        , h "Interactive control"
+        , Controls.view model
+        , showData (Controls.currentValue model)
+        , h "All possible values"
+        , List.map showData (Controls.allValues model)
+            |> Html.div []
+        , Html.hr [] []
+        , Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/blob/master/examples/LICENSE.md#images" ]
+            [ Html.text "Image credits" ]
+        ]
 
 
 main =
-    Html.App.beginnerProgram
+    Html.beginnerProgram
         { model = def3
         , view = view
         , update = always

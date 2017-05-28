@@ -1,9 +1,10 @@
 module Controls.StringTest exposing (all)
 
-import ElmTest exposing (..)
 import Controls
+import Expect
 import Html
 import Html.Attributes as Html
+import Test exposing (..)
 
 
 stringControls =
@@ -12,20 +13,22 @@ stringControls =
 
 all : Test
 all =
-    suite "Controls.string"
-        [ stringControls
-            |> Controls.currentValue
-            |> assertEqual "default"
-            |> test "initial value"
-          -- , stringControls
-          --     |> Controls.view
-          --     |> assertEqual
-          --         (Html.div []
-          --             [ Html.input
-          --                 [ Html.value "default"
-          --                 ]
-          --                 []
-          --             ]
-          --         )
-          --     |> test "Renders all options"
+    describe "Controls.string"
+        [ test "initial value" <|
+            \() ->
+                stringControls
+                    |> Controls.currentValue
+                    |> Expect.equal "default"
+
+        -- , stringControls
+        --     |> Controls.view
+        --     |> assertEqual
+        --         (Html.div []
+        --             [ Html.input
+        --                 [ Html.value "default"
+        --                 ]
+        --                 []
+        --             ]
+        --         )
+        --     |> test "Renders all options"
         ]

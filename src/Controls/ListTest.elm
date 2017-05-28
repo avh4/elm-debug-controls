@@ -1,9 +1,10 @@
 module Controls.ListTest exposing (all)
 
-import ElmTest exposing (..)
 import Controls
+import Expect
 import Html
 import Html.Attributes as Html
+import Test exposing (..)
 
 
 listControl =
@@ -12,9 +13,10 @@ listControl =
 
 all : Test
 all =
-    suite "Controls.string"
-        [ listControl
-            |> Controls.currentValue
-            |> assertEqual [ "A" ]
-            |> test "initial value"
+    describe "Controls.list"
+        [ test "initial value" <|
+            \() ->
+                listControl
+                    |> Controls.currentValue
+                    |> Expect.equal [ "A" ]
         ]
