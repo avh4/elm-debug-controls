@@ -5,6 +5,8 @@ import Expect
 import Html
 import Html.Attributes as Html
 import Test exposing (..)
+import Test.Html.Query as Query
+import Test.Html.Selector exposing (..)
 
 
 yesNoControls =
@@ -22,19 +24,13 @@ all =
                 yesNoControls
                     |> Control.currentValue
                     |> Expect.equal True
-
-        -- , yesNoControls
-        --     |> Control.view
-        --     |> assertEqual
-        --         (Html.div []
-        --             [ Html.div []
-        --                 [ Html.select []
-        --                     [ Html.option [ Html.selected True ] [ Html.text "YES" ]
-        --                     , Html.option [ Html.selected False ] [ Html.text "NO" ]
-        --                     ]
-        --                 , Html.div [] [ Html.text "" ]
-        --                 ]
-        --             ]
-        --         )
-        --     |> test "Renders all options"
+        , test "Renders all options" <|
+            \() ->
+                yesNoControls
+                    |> Control.view
+                    |> Query.fromHtml
+                    |> Expect.all
+                        [ Query.has [ tag "option", text "YES" ]
+                        , Query.has [ tag "option", text "NO" ]
+                        ]
         ]

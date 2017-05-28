@@ -5,6 +5,8 @@ import Expect
 import Html
 import Html.Attributes as Html
 import Test exposing (..)
+import Test.Html.Query as Query
+import Test.Html.Selector exposing (..)
 
 
 stringControls =
@@ -19,16 +21,10 @@ all =
                 stringControls
                     |> Control.currentValue
                     |> Expect.equal "default"
-
-        -- , stringControls
-        --     |> Control.view
-        --     |> assertEqual
-        --         (Html.div []
-        --             [ Html.input
-        --                 [ Html.value "default"
-        --                 ]
-        --                 []
-        --             ]
-        --         )
-        --     |> test "Renders all options"
+        , test "Renders all options" <|
+            \() ->
+                stringControls
+                    |> Control.view
+                    |> Query.fromHtml
+                    |> Query.has [ tag "input", attribute "value" "default" ]
         ]

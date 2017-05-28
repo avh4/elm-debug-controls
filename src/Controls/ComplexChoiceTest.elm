@@ -5,6 +5,8 @@ import Expect
 import Html
 import Html.Attributes as Html
 import Test exposing (..)
+import Test.Html.Query as Query
+import Test.Html.Selector exposing (..)
 
 
 type Animal
@@ -33,29 +35,17 @@ all =
                 maybeControls
                     |> Control.currentValue
                     |> Expect.equal (Just Monkey)
-
-        -- , maybeControls
-        --     |> Control.view
-        --     |> assertEqual
-        --         (Html.div []
-        --             [ Html.div []
-        --                 [ Html.select []
-        --                     [ Html.option [ Html.selected True ] [ Html.text "Animal" ]
-        --                     , Html.option [ Html.selected False ] [ Html.text "---" ]
-        --                     ]
-        --                 , Html.div []
-        --                     [ Html.div []
-        --                         [ Html.select []
-        --                             [ Html.option [ Html.selected True ] [ Html.text "Monkey" ]
-        --                             , Html.option [ Html.selected False ] [ Html.text "Giraffe" ]
-        --                             ]
-        --                         , Html.div [] [ Html.text "" ]
-        --                         ]
-        --                     ]
-        --                 ]
-        --             ]
-        --         )
-        --     |> test "Renders all options"
+        , test "Renders all options" <|
+            \() ->
+                maybeControls
+                    |> Control.view
+                    |> Query.fromHtml
+                    |> Expect.all
+                        [ Query.has [ tag "option", text "Animal" ]
+                        , Query.has [ tag "option", text "---" ]
+                        , Query.has [ tag "option", text "Monkey" ]
+                        , Query.has [ tag "option", text "Giraffe" ]
+                        ]
         , test "allValues" <|
             \() ->
                 maybeControls
