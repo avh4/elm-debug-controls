@@ -24,7 +24,7 @@ all =
         , test "Renders all options" <|
             \() ->
                 stringControls
-                    |> Control.view
+                    |> Control.view identity
                     |> Query.fromHtml
                     |> Query.has [ tag "input", attribute "value" "default" ]
         ]

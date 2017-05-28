@@ -58,9 +58,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ Html.map DownloadChange <| Control.view model.download
+        [ Control.view DownloadChange model.download
         , hr [] []
-        , Html.map UploadChange <| Control.view model.upload
+        , Control.view UploadChange model.upload
         ]
 
 

@@ -38,7 +38,7 @@ all =
         , test "Renders all options" <|
             \() ->
                 maybeControls
-                    |> Control.view
+                    |> Control.view identity
                     |> Query.fromHtml
                     |> Expect.all
                         [ Query.has [ tag "option", text "Animal" ]

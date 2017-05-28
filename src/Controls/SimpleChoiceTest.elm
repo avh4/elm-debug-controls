@@ -27,7 +27,7 @@ all =
         , test "Renders all options" <|
             \() ->
                 yesNoControls
-                    |> Control.view
+                    |> Control.view identity
                     |> Query.fromHtml
                     |> Expect.all
                         [ Query.has [ tag "option", text "YES" ]

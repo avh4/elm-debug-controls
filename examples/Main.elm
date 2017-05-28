@@ -139,7 +139,7 @@ view model =
     | CustomAnimal String"""
             ]
         , h "Interactive control"
-        , Debug.Control.view model
+        , Debug.Control.view identity model
         , showData (Debug.Control.currentValue model)
         , h "All possible values"
         , List.map showData (Debug.Control.allValues model)

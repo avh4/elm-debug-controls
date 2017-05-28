@@ -261,8 +261,7 @@ choice_ left current right =
                                 , [ option True current ]
                                 , List.map (option False) right
                                 ]
-                    , Html.map updateChild <|
-                        view (Tuple.second current)
+                    , view updateChild (Tuple.second current)
                     ]
         }
 
@@ -401,7 +400,7 @@ map fn (Control { currentValue, allValues, view }) =
         }
 
 
-{-| TODO: revise API
+{-| Gets the current value of a `Control`.
 -}
 currentValue : Control a -> a
 currentValue (Control c) =
@@ -415,14 +414,14 @@ allValues (Control c) =
     c.allValues ()
 
 
-{-| TODO: revise API
+{-| Renders the interactive UI for a `Control`.
 -}
-view : Control a -> Html (Control a)
-view (Control c) =
+view : (Control a -> msg) -> Control a -> Html msg
+view msg (Control c) =
     Html.div []
         [ [ DateTimePicker.Css.css ]
             |> Css.compile
             |> .css
             |> Html.CssHelpers.style
-        , c.view ()
+        , Html.map msg <| c.view ()
         ]
