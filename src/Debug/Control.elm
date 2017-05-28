@@ -2,6 +2,7 @@ module Debug.Control
     exposing
         ( Control
         , allValues
+        , bool
         , choice
         , currentValue
         , field
@@ -16,7 +17,7 @@ module Debug.Control
 
 {-| Create interactive controls for complex data structures.
 
-@docs Control, value, values, string, choice, list, record, field, map
+@docs Control, value, values, bool, string, choice, list, record, field, map
 
 @docs view, currentValue, allValues
 
@@ -55,6 +56,32 @@ value initial =
 values : List a -> Control a
 values choices =
     choice (List.map (\x -> ( toString x, value x )) choices)
+
+
+{-| A `Control` that toggles a `Bool` with a checkbox
+-}
+bool : Bool -> Control Bool
+bool value =
+    Control
+        { currentValue = value
+        , allValues =
+            \() ->
+                [ value
+                , not value
+                ]
+        , view =
+            \() ->
+                Html.span []
+                    [ Html.input
+                        [ Html.Attributes.type_ "checkbox"
+                        , Html.Events.onCheck bool
+                        , Html.Attributes.checked value
+                        ]
+                        []
+                    , Html.text " "
+                    , Html.text <| toString value
+                    ]
+        }
 
 
 {-| A `Control` that allows text input.

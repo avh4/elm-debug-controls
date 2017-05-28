@@ -17,6 +17,8 @@ type alias DownloadRequest =
 
 type alias UploadRequest =
     { path : String
+    , autorename : Bool
+    , mute : Bool
     , content : String
     }
 
@@ -29,6 +31,8 @@ init =
     , upload =
         Control.record UploadRequest
             |> Control.field "path" (Control.string "/demo.txt")
+            |> Control.field "autorename" (Control.bool False)
+            |> Control.field "mute" (Control.bool False)
             |> Control.field "content" (Control.string "HELLO.")
     }
 
