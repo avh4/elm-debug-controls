@@ -333,9 +333,15 @@ field name (Control value) (Control pipeline) =
                 Html.div []
                     [ Html.map (field name (Control value)) <|
                         pipeline.view ()
-                    , Html.div []
-                        [ Html.text name
-                        , Html.text " = "
+                    , Html.div
+                        [ Html.Attributes.style
+                            [ ( "display", "flex" )
+                            ]
+                        ]
+                        [ Html.span []
+                            [ Html.text name
+                            , Html.text " = "
+                            ]
                         , Html.map (\v -> field name v (Control pipeline)) <|
                             value.view ()
                         ]
