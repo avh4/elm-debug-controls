@@ -34,7 +34,8 @@ init =
         Control.record UploadRequest
             |> Control.field "path" (Control.string "/demo.txt")
             |> Control.field "autorename" (Control.bool False)
-            |> Control.field "clientModified" (Control.maybe False <| Control.date <| Date.fromTime 0)
+            |> Control.field "clientModified"
+                (Control.maybe False <| Control.date <| Date.fromTime 0)
             |> Control.field "mute" (Control.bool False)
             |> Control.field "content" (Control.string "HELLO.")
     }
