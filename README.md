@@ -25,7 +25,7 @@ debugControl =
             ]
 ```
 
-You can now use `debugControl` to create an interactve control the generate data, or to create an exhaustive list of all possible data.  You can see what this looks like at http://avh4.github.io/elm-debug-controls/examples/
+You can now use `debugControl` to create an interactve control the generate data, or to create an exhaustive list of all possible data.  You can see what this looks like at http://avh4.github.io/elm-debug-controls/
 
 ```elm
 view : Control (Maybe Animal) -> Html (Control (Maybe Animal))
