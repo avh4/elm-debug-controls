@@ -4,8 +4,10 @@ module Debug.Control
         , allValues
         , choice
         , currentValue
+        , field
         , list
         , map
+        , record
         , string
         , value
         , values
@@ -14,7 +16,7 @@ module Debug.Control
 
 {-| Create interactive controls for complex data structures.
 
-@docs Control, value, values, string, choice, list, map
+@docs Control, value, values, string, choice, list, record, field, map
 
 @docs view, currentValue, allValues
 
@@ -208,6 +210,63 @@ list_ itemControl current min max =
                             ]
                             []
                         ]
+        }
+
+
+{-| Create a `Control` representing a record with multiple fields.
+
+This uses an API similar to [elm-decode-pipeline](http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/latest).
+
+You will use this with `field`.
+
+    import Debug.Control exposing (field, record, string)
+
+    type alias Point =
+        { x : String
+        , y : String
+        }
+
+    pointControl : Control Point
+    pointControl =
+        record Point
+            |> field "x" (string "initial x value")
+            |> field "y" (string "initial y value")
+
+-}
+record : a -> Control a
+record fn =
+    Control
+        { currentValue = fn
+        , allValues = \() -> [ fn ]
+        , view = \() -> Html.text ""
+        }
+
+
+{-| Used with `record` to create a `Control` representing a record.
+
+See [`record`](#record).
+
+-}
+field : String -> Control a -> Control (a -> b) -> Control b
+field name (Control value) (Control pipeline) =
+    Control
+        { currentValue = pipeline.currentValue value.currentValue
+        , allValues =
+            \() ->
+                value.allValues ()
+                    |> List.concatMap
+                        (\v ->
+                            List.map (\p -> p v)
+                                (pipeline.allValues ())
+                        )
+        , view =
+            \() ->
+                Html.div []
+                    [ Html.text name
+                    , Html.text "="
+                    , Html.map (map pipeline.currentValue) <|
+                        value.view ()
+                    ]
         }
 
 
