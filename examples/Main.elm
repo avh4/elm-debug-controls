@@ -1,8 +1,10 @@
 module Main exposing (..)
 
+import BeautifulExample
+import Color
 import Controls exposing (Control, choice, list, map, string, value, values)
 import Html
-import Html.Attributes as Html
+import Html.Attributes as Html exposing (style)
 import String
 
 
@@ -118,12 +120,24 @@ view model =
             Html.table []
                 [ Html.tr []
                     [ Html.td [] [ viewAnimal 50 data ]
-                    , Html.td [] [ Html.pre [] [ Html.text (toString data) ] ]
+                    , Html.td []
+                        [ Html.code
+                            [ style [ ( "word-break", "break-all" ) ] ]
+                            [ Html.text (toString data) ]
+                        ]
                     ]
                 ]
     in
-    Html.div [ Html.style [ ( "padding", "24px" ) ] ]
-        [ Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/" ] [ Html.text "https://github.com/avh4/elm-debug-controls/" ]
+    Html.div []
+        [ h "Example data structure"
+        , Html.pre []
+            [ Html.text """type Animal
+    = Monkey
+    | Giraffe
+    | Eagle
+    | Chimera (List Animal)
+    | CustomAnimal String"""
+            ]
         , h "Interactive control"
         , Controls.view model
         , showData (Controls.currentValue model)
@@ -139,6 +153,15 @@ view model =
 main =
     Html.beginnerProgram
         { model = def3
-        , view = view
+        , view =
+            view
+                >> BeautifulExample.view
+                    { title = "elm-debug-controls"
+                    , details = Just """This package helps you easily create interactive and exhaustive views of complex data structures."""
+                    , color = Just Color.brown
+                    , maxWidth = 600
+                    , githubUrl = Just "https://github.com/avh4/elm-debug-controls"
+                    , documentationUrl = Nothing
+                    }
         , update = always
         }
