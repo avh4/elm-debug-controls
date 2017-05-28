@@ -1,6 +1,6 @@
 module Controls.ListTest exposing (all)
 
-import Controls
+import Debug.Control as Control
 import Expect
 import Html
 import Html.Attributes as Html
@@ -8,15 +8,15 @@ import Test exposing (..)
 
 
 listControl =
-    Controls.list <| Controls.values [ "A", "B" ]
+    Control.list <| Control.values [ "A", "B" ]
 
 
 all : Test
 all =
-    describe "Controls.list"
+    describe "Control.list"
         [ test "initial value" <|
             \() ->
                 listControl
-                    |> Controls.currentValue
+                    |> Control.currentValue
                     |> Expect.equal [ "A" ]
         ]

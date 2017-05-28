@@ -1,6 +1,6 @@
 module Controls.SimpleChoiceTest exposing (all)
 
-import Controls
+import Debug.Control as Control
 import Expect
 import Html
 import Html.Attributes as Html
@@ -8,23 +8,23 @@ import Test exposing (..)
 
 
 yesNoControls =
-    Controls.choice
-        [ ( "YES", Controls.value True )
-        , ( "NO", Controls.value False )
+    Control.choice
+        [ ( "YES", Control.value True )
+        , ( "NO", Control.value False )
         ]
 
 
 all : Test
 all =
-    describe "Controls.choice"
+    describe "Control.choice"
         [ test "initial value is the first choice" <|
             \() ->
                 yesNoControls
-                    |> Controls.currentValue
+                    |> Control.currentValue
                     |> Expect.equal True
 
         -- , yesNoControls
-        --     |> Controls.view
+        --     |> Control.view
         --     |> assertEqual
         --         (Html.div []
         --             [ Html.div []

@@ -1,4 +1,4 @@
-module Controls
+module Debug.Control
     exposing
         ( Control
         , allValues
@@ -12,6 +12,14 @@ module Controls
         , view
         )
 
+{-| Create interactive controls for complex data structures.
+
+@docs Control, value, values, string, choice, list, map
+
+@docs view, currentValue, allValues
+
+-}
+
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
@@ -19,6 +27,8 @@ import Json.Decode
 import String
 
 
+{-| An interactive control that produces a value `a`.
+-}
 type Control a
     = Control
         { currentValue : a
@@ -27,6 +37,8 @@ type Control a
         }
 
 
+{-| A `Control` that has a static value.
+-}
 value : a -> Control a
 value initial =
     Control
@@ -36,11 +48,15 @@ value initial =
         }
 
 
+{-| A `Control` that chooses between a list of values.
+-}
 values : List a -> Control a
 values choices =
     choice (List.map (\x -> ( toString x, value x )) choices)
 
 
+{-| A `Control` that allows text input.
+-}
 string : String -> Control String
 string value =
     Control
@@ -63,6 +79,11 @@ string value =
         }
 
 
+{-| A `Control` that chooses between a list of nested controls
+
+This will crash if you provide an empty list.
+
+-}
 choice : List ( String, Control a ) -> Control a
 choice choices =
     case choices of
@@ -138,6 +159,8 @@ choice_ left current right =
         }
 
 
+{-| A `Control` that provides a list of selected length.
+-}
 list : Control a -> Control (List a)
 list itemControl =
     list_ itemControl 1 0 10
@@ -188,6 +211,8 @@ list_ itemControl current min max =
         }
 
 
+{-| Transform the value produced by a `Control`.
+-}
 map : (a -> b) -> Control a -> Control b
 map fn (Control { currentValue, allValues, view }) =
     let
@@ -201,16 +226,22 @@ map fn (Control { currentValue, allValues, view }) =
         }
 
 
+{-| TODO: revise API
+-}
 currentValue : Control a -> a
 currentValue (Control c) =
     c.currentValue
 
 
+{-| TODO: revise API
+-}
 allValues : Control a -> List a
 allValues (Control c) =
     c.allValues ()
 
 
+{-| TODO: revise API
+-}
 view : Control a -> Html (Control a)
 view (Control c) =
     c.view ()

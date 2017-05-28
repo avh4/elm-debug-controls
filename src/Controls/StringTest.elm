@@ -1,6 +1,6 @@
 module Controls.StringTest exposing (all)
 
-import Controls
+import Debug.Control as Control
 import Expect
 import Html
 import Html.Attributes as Html
@@ -8,20 +8,20 @@ import Test exposing (..)
 
 
 stringControls =
-    Controls.string "default"
+    Control.string "default"
 
 
 all : Test
 all =
-    describe "Controls.string"
+    describe "Control.string"
         [ test "initial value" <|
             \() ->
                 stringControls
-                    |> Controls.currentValue
+                    |> Control.currentValue
                     |> Expect.equal "default"
 
         -- , stringControls
-        --     |> Controls.view
+        --     |> Control.view
         --     |> assertEqual
         --         (Html.div []
         --             [ Html.input

@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import BeautifulExample
 import Color
-import Controls exposing (Control, choice, list, map, string, value, values)
+import Debug.Control exposing (Control, choice, list, map, string, value, values)
 import Html
 import Html.Attributes as Html exposing (style)
 import String
@@ -139,10 +139,10 @@ view model =
     | CustomAnimal String"""
             ]
         , h "Interactive control"
-        , Controls.view model
-        , showData (Controls.currentValue model)
+        , Debug.Control.view model
+        , showData (Debug.Control.currentValue model)
         , h "All possible values"
-        , List.map showData (Controls.allValues model)
+        , List.map showData (Debug.Control.allValues model)
             |> Html.div []
         , Html.hr [] []
         , Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/blob/master/examples/LICENSE.md#images" ]

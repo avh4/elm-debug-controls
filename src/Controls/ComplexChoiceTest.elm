@@ -1,6 +1,6 @@
 module Controls.ComplexChoiceTest exposing (all)
 
-import Controls
+import Debug.Control as Control
 import Expect
 import Html
 import Html.Attributes as Html
@@ -13,29 +13,29 @@ type Animal
 
 
 maybeControls =
-    Controls.choice
+    Control.choice
         [ ( "Animal"
-          , Controls.map Just <|
-                Controls.choice
-                    [ ( "Monkey", Controls.value Monkey )
-                    , ( "Giraffe", Controls.value Giraffe )
+          , Control.map Just <|
+                Control.choice
+                    [ ( "Monkey", Control.value Monkey )
+                    , ( "Giraffe", Control.value Giraffe )
                     ]
           )
-        , ( "---", Controls.value Nothing )
+        , ( "---", Control.value Nothing )
         ]
 
 
 all : Test
 all =
-    describe "Controls.choice (complex)"
+    describe "Control.choice (complex)"
         [ test "initial value is the first choice" <|
             \() ->
                 maybeControls
-                    |> Controls.currentValue
+                    |> Control.currentValue
                     |> Expect.equal (Just Monkey)
 
         -- , maybeControls
-        --     |> Controls.view
+        --     |> Control.view
         --     |> assertEqual
         --         (Html.div []
         --             [ Html.div []
@@ -59,7 +59,7 @@ all =
         , test "allValues" <|
             \() ->
                 maybeControls
-                    |> Controls.allValues
+                    |> Control.allValues
                     |> Expect.equal
                         [ Just Monkey
                         , Just Giraffe
