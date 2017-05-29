@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "summary": "Easily create interactive UIs for complex data structures for quickly building debugging consoles, documentation, and style guides",
+    "summary": "Easily create interactive UIs for complex data structures",
     "repository": "https://github.com/avh4/elm-debug-controls.git",
     "license": "BSD3",
     "source-directories": [
