@@ -85,7 +85,9 @@ maybe isJust (Control value) =
                     :: List.map Just (value.allValues ())
         , view =
             \() ->
-                Html.span []
+                Html.span
+                    [ Html.Attributes.style [ ( "white-space", "nowrap" ) ]
+                    ]
                     [ Html.input
                         [ Html.Attributes.type_ "checkbox"
                         , Html.Events.onCheck (flip maybe (Control value))
@@ -372,9 +374,15 @@ field name (Control value) (Control pipeline) =
                     , Html.div
                         [ Html.Attributes.style
                             [ ( "display", "flex" )
+                            , ( "align-items", "center" )
                             ]
                         ]
-                        [ Html.span []
+                        [ Html.span
+                            [ Html.Attributes.style
+                                [ ( "margin-right", "4px" )
+                                , ( "white-space", "nowrap" )
+                                ]
+                            ]
                             [ Html.text name
                             , Html.text " = "
                             ]

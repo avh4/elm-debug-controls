@@ -1,5 +1,7 @@
 module Main exposing (main)
 
+import BeautifulExample
+import Color
 import Date exposing (Date)
 import Debug.Control as Control exposing (Control)
 import Html exposing (..)
@@ -73,8 +75,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ Control.view DownloadChange model.download
-        , hr [] []
+        [ h2 [] [ text "Download" ]
+        , Control.view DownloadChange model.download
+        , h2 [] [ text "Upload" ]
         , Control.view UploadChange model.upload
         ]
 
@@ -84,5 +87,14 @@ main =
     Html.beginnerProgram
         { model = init
         , update = update
-        , view = view
+        , view =
+            view
+                >> BeautifulExample.view
+                    { title = "elm-debug-controls"
+                    , details = Just """This package helps you easily create interactive and exhaustive views of complex data structures."""
+                    , color = Just Color.brown
+                    , maxWidth = 600
+                    , githubUrl = Just "https://github.com/avh4/elm-debug-controls"
+                    , documentationUrl = Nothing
+                    }
         }
