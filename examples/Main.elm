@@ -151,17 +151,15 @@ view model =
 
 
 main =
-    Html.beginnerProgram
+    BeautifulExample.beginnerProgram
+        { title = "elm-debug-controls"
+        , details = Just """This package helps you easily create interactive and exhaustive views of complex data structures."""
+        , color = Just Color.brown
+        , maxWidth = 600
+        , githubUrl = Just "https://github.com/avh4/elm-debug-controls"
+        , documentationUrl = Just "http://packages.elm-lang.org/packages/avh4/elm-debug-controls/latest"
+        }
         { model = def3
-        , view =
-            view
-                >> BeautifulExample.view
-                    { title = "elm-debug-controls"
-                    , details = Just """This package helps you easily create interactive and exhaustive views of complex data structures."""
-                    , color = Just Color.brown
-                    , maxWidth = 600
-                    , githubUrl = Just "https://github.com/avh4/elm-debug-controls"
-                    , documentationUrl = Nothing
-                    }
+        , view = view
         , update = always
         }

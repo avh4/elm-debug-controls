@@ -76,6 +76,10 @@ values choices =
 
 
 {-| A `Control` that wraps another control in a `Maybe`
+
+The `Bool` parameter is the initial value, where `False` is `Nothing`,
+and `True` is `Just` with the value of the nested control.
+
 -}
 maybe : Bool -> Control a -> Control (Maybe a)
 maybe isJust (Control value) =
