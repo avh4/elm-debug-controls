@@ -46,7 +46,7 @@ init =
                 (Control.choice
                     [ ( "Add", Control.value Add )
                     , ( "Overwrite", Control.value Overwrite )
-                    , ( "Update", Control.map Update <| Control.string "123abcdef" )
+                    , ( "Update rev", Control.map Update <| Control.string "123abcdef" )
                     ]
                 )
             |> Control.field "autorename" (Control.bool False)

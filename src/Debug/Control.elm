@@ -47,8 +47,14 @@ type Control a
     = Control
         { currentValue : a
         , allValues : () -> List a
-        , view : () -> Html (Control a)
+        , view : ControlView a
         }
+
+
+type ControlView a
+    = NoView
+    | SingleView (() -> Html (Control a))
+    | FieldViews (List ( String, () -> Html (Control a) ))
 
 
 {-| A `Control` that has a static value.
@@ -58,7 +64,7 @@ value initial =
     Control
         { currentValue = initial
         , allValues = \() -> [ initial ]
-        , view = \() -> Html.text ""
+        , view = NoView
         }
 
 
@@ -84,23 +90,23 @@ maybe isJust (Control value) =
                 Nothing
                     :: List.map Just (value.allValues ())
         , view =
-            \() ->
-                Html.span
-                    [ Html.Attributes.style [ ( "white-space", "nowrap" ) ]
-                    ]
-                    [ Html.input
-                        [ Html.Attributes.type_ "checkbox"
-                        , Html.Events.onCheck (flip maybe (Control value))
-                        , Html.Attributes.checked isJust
+            SingleView <|
+                \() ->
+                    Html.span
+                        [ Html.Attributes.style [ ( "white-space", "nowrap" ) ]
                         ]
-                        []
-                    , Html.text " "
-                    , if isJust then
-                        Html.map (maybe isJust) <|
-                            value.view ()
-                      else
-                        Html.text "Nothing"
-                    ]
+                        [ Html.input
+                            [ Html.Attributes.type_ "checkbox"
+                            , Html.Events.onCheck (flip maybe (Control value))
+                            , Html.Attributes.checked isJust
+                            ]
+                            []
+                        , Html.text " "
+                        , if isJust then
+                            view_ (maybe isJust) (Control value)
+                          else
+                            Html.text "Nothing"
+                        ]
         }
 
 
@@ -116,17 +122,18 @@ bool value =
                 , not value
                 ]
         , view =
-            \() ->
-                Html.span []
-                    [ Html.input
-                        [ Html.Attributes.type_ "checkbox"
-                        , Html.Events.onCheck bool
-                        , Html.Attributes.checked value
+            SingleView <|
+                \() ->
+                    Html.span []
+                        [ Html.input
+                            [ Html.Attributes.type_ "checkbox"
+                            , Html.Events.onCheck bool
+                            , Html.Attributes.checked value
+                            ]
+                            []
+                        , Html.text " "
+                        , Html.text <| toString value
                         ]
-                        []
-                    , Html.text " "
-                    , Html.text <| toString value
-                    ]
         }
 
 
@@ -145,12 +152,13 @@ string value =
                 , "Long text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
                 ]
         , view =
-            \() ->
-                Html.input
-                    [ Html.Attributes.value value
-                    , Html.Events.onInput string
-                    ]
-                    []
+            SingleView <|
+                \() ->
+                    Html.input
+                        [ Html.Attributes.value value
+                        , Html.Events.onInput string
+                        ]
+                        []
         }
 
 
@@ -168,24 +176,25 @@ date_ state value =
         { currentValue = value
         , allValues = \() -> [ value ] -- TODO
         , view =
-            \() ->
-                Html.span
-                    [ Html.Attributes.style
-                        [ ( "display", "inline-block" ) ]
-                    ]
-                    [ DateTimePicker.dateTimePicker
-                        (\newState newDate ->
-                            case newDate of
-                                Nothing ->
-                                    date_ newState value
+            SingleView <|
+                \() ->
+                    Html.span
+                        [ Html.Attributes.style
+                            [ ( "display", "inline-block" ) ]
+                        ]
+                        [ DateTimePicker.dateTimePicker
+                            (\newState newDate ->
+                                case newDate of
+                                    Nothing ->
+                                        date_ newState value
 
-                                Just d ->
-                                    date_ newState d
-                        )
-                        []
-                        state
-                        (Just value)
-                    ]
+                                    Just d ->
+                                        date_ newState d
+                            )
+                            []
+                            state
+                            (Just value)
+                        ]
         }
 
 
@@ -218,53 +227,54 @@ choice_ left current right =
                     |> List.map (Tuple.second >> allValues)
                     |> List.concat
         , view =
-            \() ->
-                let
-                    option selected ( label, value ) =
-                        Html.option
-                            [ Html.Attributes.selected selected ]
-                            [ Html.text label ]
+            SingleView <|
+                \() ->
+                    let
+                        option selected ( label, value ) =
+                            Html.option
+                                [ Html.Attributes.selected selected ]
+                                [ Html.text label ]
 
-                    selectNew i =
-                        let
-                            all =
-                                List.reverse left
-                                    ++ [ current ]
-                                    ++ right
+                        selectNew i =
+                            let
+                                all =
+                                    List.reverse left
+                                        ++ [ current ]
+                                        ++ right
 
-                            left_ =
-                                all
-                                    |> List.take i
-                                    |> List.reverse
+                                left_ =
+                                    all
+                                        |> List.take i
+                                        |> List.reverse
 
-                            current_ =
-                                all
-                                    |> List.drop i
-                                    |> List.head
-                                    |> Maybe.withDefault current
+                                current_ =
+                                    all
+                                        |> List.drop i
+                                        |> List.head
+                                        |> Maybe.withDefault current
 
-                            right_ =
-                                all
-                                    |> List.drop (i + 1)
-                        in
-                        choice_ left_ current_ right_ |> Debug.log "new"
+                                right_ =
+                                    all
+                                        |> List.drop (i + 1)
+                            in
+                            choice_ left_ current_ right_ |> Debug.log "new"
 
-                    updateChild new =
-                        choice_ left ( Tuple.first current, new ) right
-                in
-                Html.div []
-                    [ Html.map selectNew <|
-                        Html.select
-                            [ Html.Events.on "change" (Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int)
-                            ]
-                        <|
-                            List.concat
-                                [ List.map (option False) <| List.reverse left
-                                , [ option True current ]
-                                , List.map (option False) right
+                        updateChild new =
+                            choice_ left ( Tuple.first current, new ) right
+                    in
+                    Html.div []
+                        [ Html.map selectNew <|
+                            Html.select
+                                [ Html.Events.on "change" (Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int)
                                 ]
-                    , view updateChild (Tuple.second current)
-                    ]
+                            <|
+                                List.concat
+                                    [ List.map (option False) <| List.reverse left
+                                    , [ option True current ]
+                                    , List.map (option False) right
+                                    ]
+                        , view_ updateChild (Tuple.second current)
+                        ]
         }
 
 
@@ -293,30 +303,31 @@ list_ itemControl current min max =
                     |> flip List.append [ min, max ]
                     |> List.map makeList
         , view =
-            \() ->
-                let
-                    selectNew new =
-                        list_ itemControl new min max
-                in
-                Html.map
-                    (String.toInt
-                        >> Result.toMaybe
-                        >> Maybe.withDefault current
-                        >> selectNew
-                    )
-                <|
-                    Html.label []
-                        [ Html.text ""
-                        , Html.input
-                            [ Html.Attributes.type_ "range"
-                            , Html.Attributes.min <| toString min
-                            , Html.Attributes.max <| toString max
-                            , Html.Attributes.step <| toString 1
-                            , Html.Attributes.attribute "value" <| toString current
-                            , Html.Events.on "input" Html.Events.targetValue
+            SingleView <|
+                \() ->
+                    let
+                        selectNew new =
+                            list_ itemControl new min max
+                    in
+                    Html.map
+                        (String.toInt
+                            >> Result.toMaybe
+                            >> Maybe.withDefault current
+                            >> selectNew
+                        )
+                    <|
+                        Html.label []
+                            [ Html.text ""
+                            , Html.input
+                                [ Html.Attributes.type_ "range"
+                                , Html.Attributes.min <| toString min
+                                , Html.Attributes.max <| toString max
+                                , Html.Attributes.step <| toString 1
+                                , Html.Attributes.attribute "value" <| toString current
+                                , Html.Events.on "input" Html.Events.targetValue
+                                ]
+                                []
                             ]
-                            []
-                        ]
         }
 
 
@@ -345,7 +356,7 @@ record fn =
     Control
         { currentValue = fn
         , allValues = \() -> [ fn ]
-        , view = \() -> Html.text ""
+        , view = FieldViews []
         }
 
 
@@ -367,44 +378,46 @@ field name (Control value) (Control pipeline) =
                                 (pipeline.allValues ())
                         )
         , view =
-            \() ->
-                Html.div []
-                    [ Html.map (field name (Control value)) <|
-                        pipeline.view ()
-                    , Html.div
-                        [ Html.Attributes.style
-                            [ ( "display", "flex" )
-                            , ( "align-items", "center" )
-                            ]
-                        ]
-                        [ Html.span
-                            [ Html.Attributes.style
-                                [ ( "margin-right", "4px" )
-                                , ( "white-space", "nowrap" )
-                                ]
-                            ]
-                            [ Html.text name
-                            , Html.text " = "
-                            ]
-                        , Html.map (\v -> field name v (Control pipeline)) <|
-                            value.view ()
-                        ]
-                    ]
+            let
+                otherFields =
+                    case pipeline.view of
+                        FieldViews fs ->
+                            List.map (Tuple.mapSecond (\x -> \() -> Html.map (field name (Control value)) (x ())))
+                                fs
+
+                        _ ->
+                            []
+
+                newView () =
+                    view_ (\v -> field name v (Control pipeline)) (Control value)
+            in
+            FieldViews (( name, newView ) :: otherFields)
         }
 
 
 {-| Transform the value produced by a `Control`.
 -}
 map : (a -> b) -> Control a -> Control b
-map fn (Control { currentValue, allValues, view }) =
+map fn (Control a) =
     let
         mapTuple ( label, value ) =
             ( label, map fn value )
     in
     Control
-        { currentValue = fn currentValue
-        , allValues = \() -> List.map fn (allValues ())
-        , view = \() -> Html.map (map fn) (view ())
+        { currentValue = fn a.currentValue
+        , allValues = \() -> List.map fn (a.allValues ())
+        , view =
+            case a.view of
+                NoView ->
+                    NoView
+
+                SingleView v ->
+                    SingleView <|
+                        \() -> Html.map (map fn) (v ())
+
+                FieldViews fs ->
+                    FieldViews <|
+                        List.map (Tuple.mapSecond (\v -> \() -> Html.map (map fn) (v ()))) fs
         }
 
 
@@ -426,10 +439,62 @@ allValues (Control c) =
 -}
 view : (Control a -> msg) -> Control a -> Html msg
 view msg (Control c) =
+    let
+        fieldRow ( name, view ) =
+            Html.tr []
+                [ Html.td
+                    [ Html.Attributes.style [ ( "text-align", "right" ) ] ]
+                    [ Html.text name ]
+                , Html.td [] [ Html.text " = " ]
+                , Html.td [] [ view () ]
+                ]
+    in
     Html.div []
         [ [ DateTimePicker.Css.css ]
             |> Css.compile
             |> .css
             |> Html.CssHelpers.style
-        , Html.map msg <| c.view ()
+        , view_ msg (Control c)
         ]
+
+
+view_ : (Control a -> msg) -> Control a -> Html msg
+view_ msg (Control c) =
+    let
+        fieldRow ( name, view ) =
+            Html.tr
+                [ Html.Attributes.style
+                    [ ( "vertical-align", "text-top" ) ]
+                ]
+                [ Html.td [] [ Html.text "," ]
+                , Html.td
+                    [ Html.Attributes.style
+                        [ ( "text-align", "right" ) ]
+                    ]
+                    [ Html.text name ]
+                , Html.td [] [ Html.text " = " ]
+                , Html.td [] [ view () ]
+                ]
+    in
+    case c.view of
+        NoView ->
+            Html.text ""
+
+        SingleView v ->
+            Html.map msg <| v ()
+
+        FieldViews fs ->
+            List.concat
+                [ [ Html.tr
+                        [ Html.Attributes.style
+                            [ ( "vertical-align", "text-top" ) ]
+                        ]
+                        [ Html.td [] [ Html.text "{" ] ]
+                  ]
+                , fs
+                    |> List.reverse
+                    |> List.map fieldRow
+                , [ Html.tr [] [ Html.td [] [ Html.text "}" ] ] ]
+                ]
+                |> Html.table []
+                |> Html.map msg
