@@ -1,7 +1,5 @@
-module Main exposing (main)
+module DropboxExample exposing (Model, Msg, init, update, view)
 
-import BeautifulExample
-import Color
 import Date exposing (Date)
 import Debug.Control as Control exposing (Control)
 import Html exposing (..)
@@ -132,19 +130,3 @@ record UploadRequest
     |> field "content" (string "HELLO.")""" ]
         , Control.view UploadChange model.upload
         ]
-
-
-main : Program Never Model Msg
-main =
-    BeautifulExample.beginnerProgram
-        { title = "elm-debug-controls"
-        , details = Just """This package helps you easily create interactive and exhaustive views of complex data structures."""
-        , color = Just Color.brown
-        , maxWidth = 600
-        , githubUrl = Just "https://github.com/avh4/elm-debug-controls"
-        , documentationUrl = Just "http://packages.elm-lang.org/packages/avh4/elm-debug-controls/latest"
-        }
-        { model = init
-        , update = update
-        , view = view
-        }
