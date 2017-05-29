@@ -16,8 +16,15 @@ type alias DownloadRequest =
     }
 
 
+type WriteMode
+    = Add
+    | Overwrite
+    | Update String
+
+
 type alias UploadRequest =
     { path : String
+    , mode : WriteMode
     , autorename : Bool
     , clientModified : Maybe Date
     , mute : Bool
@@ -33,6 +40,13 @@ init =
     , upload =
         Control.record UploadRequest
             |> Control.field "path" (Control.string "/demo.txt")
+            |> Control.field "mode"
+                (Control.choice
+                    [ ( "Add", Control.value Add )
+                    , ( "Overwrite", Control.value Overwrite )
+                    , ( "Update", Control.map Update <| Control.string "123abcdef" )
+                    ]
+                )
             |> Control.field "autorename" (Control.bool False)
             |> Control.field "clientModified"
                 (Control.maybe False <| Control.date <| Date.fromTime 0)
