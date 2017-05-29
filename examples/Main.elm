@@ -110,7 +110,7 @@ main =
         , color = Just Color.brown
         , maxWidth = 600
         , githubUrl = Just "https://github.com/avh4/elm-debug-controls"
-        , documentationUrl = Just "http://packages.elm-lang.org/packages/avh4/elm-debug-controls/latest"
+        , documentationUrl = Just "http://package.elm-lang.org/packages/avh4/elm-debug-controls/latest"
         }
         { model = initialModel
         , update = update
