@@ -57,7 +57,7 @@ type ControlView a
     | FieldViews (List ( String, () -> Html (Control a) ))
 
 
-{-| A `Control` that has a static value.
+{-| A `Control` that has a static value (and no UI).
 -}
 value : a -> Control a
 value initial =
@@ -68,14 +68,17 @@ value initial =
         }
 
 
-{-| A `Control` that chooses between a list of values.
+{-| A `Control` that chooses between a list of values with a dropdown UI.
+
+The first value will be the initial value.
+
 -}
 values : List a -> Control a
 values choices =
     choice (List.map (\x -> ( toString x, value x )) choices)
 
 
-{-| A `Control` that wraps another control in a `Maybe`
+{-| A `Control` that wraps another control in a `Maybe`, which a checkbox UI.
 
 The `Bool` parameter is the initial value, where `False` is `Nothing`,
 and `True` is `Just` with the value of the nested control.
@@ -114,7 +117,7 @@ maybe isJust (Control value) =
         }
 
 
-{-| A `Control` that toggles a `Bool` with a checkbox
+{-| A `Control` that toggles a `Bool` with a checkbox UI.
 -}
 bool : Bool -> Control Bool
 bool value =
@@ -167,7 +170,7 @@ string value =
 
 
 {-| A `Control` that allows a Date (include date and time) input
-with a date picker.
+with a date picker UI.
 -}
 date : Date -> Control Date
 date value =
@@ -202,9 +205,11 @@ date_ state value =
         }
 
 
-{-| A `Control` that chooses between a list of nested controls
+{-| A `Control` that chooses between a list of nested controls.
 
 This will crash if you provide an empty list.
+
+The first entry will be the initial value.
 
 -}
 choice : List ( String, Control a ) -> Control a
