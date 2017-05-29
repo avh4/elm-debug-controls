@@ -24,9 +24,6 @@ elm-test
 
 ## examples
 
-mkdir -p docs
-cp examples/*.svg docs/
 pushd examples
 elm-make --yes Main.elm --output /dev/null
-elm-make --yes Dropbox.elm --output /dev/null
 popd
