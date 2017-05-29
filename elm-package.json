@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "summary": "Easily create interactive UIs for complex data structures",
     "repository": "https://github.com/avh4/elm-debug-controls.git",
     "license": "BSD3",
