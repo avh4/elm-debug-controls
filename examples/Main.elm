@@ -39,7 +39,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { which = Animal
+    { which = Dropbox
     , animal = AnimalExample.debugControl
     , dropbox = DropboxExample.init
     , choice = choiceControl
@@ -77,9 +77,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick (SwitchTo Animal) ] [ text "Union type example (Animal)" ]
+        [ button [ onClick (SwitchTo Dropbox) ] [ text "Records example (Upload/Download)" ]
         , br [] []
-        , button [ onClick (SwitchTo Dropbox) ] [ text "Records example (Upload/Download)" ]
+        , button [ onClick (SwitchTo Animal) ] [ text "Union type example (Animal)" ]
         , br [] []
         , button [ onClick (SwitchTo SimpleControls) ] [ text "Simple controls" ]
         , br [] []
