@@ -36,7 +36,7 @@ type WriteMode
 Using `elm-debug-controls`, we can quickly create an interactive UI to create `UploadRequest` values:
 
 ```sh
-elm-package install avh4/elm-debug-controls
+elm install avh4/elm-debug-controls
 ```
 
 ```elm
