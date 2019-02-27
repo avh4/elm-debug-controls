@@ -26,5 +26,5 @@ all =
                 stringControls
                     |> Control.view identity
                     |> Query.fromHtml
-                    |> Query.has [ tag "input", attribute "value" "default" ]
+                    |> Query.has [ tag "input", attribute (Html.value "default") ]
         ]

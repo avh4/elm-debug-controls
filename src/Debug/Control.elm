@@ -1,21 +1,11 @@
-module Debug.Control
-    exposing
-        ( Control
-        , allValues
-        , bool
-        , choice
-        , currentValue
-        , date
-        , field
-        , list
-        , map
-        , maybe
-        , record
-        , string
-        , value
-        , values
-        , view
-        )
+module Debug.Control exposing
+    ( Control
+    , value
+    , bool, string, date
+    , values, maybe, choice, list, record, field
+    , map
+    , view, currentValue, allValues
+    )
 
 {-| Create interactive controls for complex data structures.
 
@@ -30,15 +20,15 @@ module Debug.Control
 -}
 
 import Css
-import Date exposing (Date)
 import DateTimePicker
-import DateTimePicker.Css
 import Html exposing (Html)
 import Html.Attributes
-import Html.CssHelpers
 import Html.Events
+import Html.Styled
 import Json.Decode
 import String
+import Time
+import Time.Extra
 
 
 {-| An interactive control that produces a value `a`.
@@ -73,8 +63,8 @@ value initial =
 The first value will be the initial value.
 
 -}
-values : List a -> Control a
-values choices =
+values : (a -> String) -> List a -> Control a
+values toString choices =
     choice (List.map (\x -> ( toString x, value x )) choices)
 
 
@@ -85,32 +75,34 @@ and `True` is `Just` with the value of the nested control.
 
 -}
 maybe : Bool -> Control a -> Control (Maybe a)
-maybe isJust (Control value) =
+maybe isJust (Control control) =
     Control
         { currentValue =
             if isJust then
-                Just value.currentValue
+                Just control.currentValue
+
             else
                 Nothing
         , allValues =
             \() ->
                 Nothing
-                    :: List.map Just (value.allValues ())
+                    :: List.map Just (control.allValues ())
         , view =
             SingleView <|
                 \() ->
                     Html.span
-                        [ Html.Attributes.style [ ( "white-space", "nowrap" ) ]
+                        [ Html.Attributes.style "white-space" "nowrap"
                         ]
                         [ Html.input
                             [ Html.Attributes.type_ "checkbox"
-                            , Html.Events.onCheck (flip maybe (Control value))
+                            , Html.Events.onCheck (\a -> maybe a (Control control))
                             , Html.Attributes.checked isJust
                             ]
                             []
                         , Html.text " "
                         , if isJust then
-                            view_ (maybe isJust) (Control value)
+                            view_ (maybe isJust) (Control control)
+
                           else
                             Html.text "Nothing"
                         ]
@@ -120,13 +112,13 @@ maybe isJust (Control value) =
 {-| A `Control` that toggles a `Bool` with a checkbox UI.
 -}
 bool : Bool -> Control Bool
-bool value =
+bool initialValue =
     Control
-        { currentValue = value
+        { currentValue = initialValue
         , allValues =
             \() ->
-                [ value
-                , not value
+                [ initialValue
+                , not initialValue
                 ]
         , view =
             SingleView <|
@@ -135,11 +127,16 @@ bool value =
                         [ Html.input
                             [ Html.Attributes.type_ "checkbox"
                             , Html.Events.onCheck bool
-                            , Html.Attributes.checked value
+                            , Html.Attributes.checked initialValue
                             ]
                             []
                         , Html.text " "
-                        , Html.text <| toString value
+                        , case initialValue of
+                            True ->
+                                Html.text "True"
+
+                            False ->
+                                Html.text "False"
                         ]
         }
 
@@ -147,12 +144,12 @@ bool value =
 {-| A `Control` that allows text input.
 -}
 string : String -> Control String
-string value =
+string initialValue =
     Control
-        { currentValue = value
+        { currentValue = initialValue
         , allValues =
             \() ->
-                [ value
+                [ initialValue
                 , ""
                 , "short"
                 , "Longwordyesverylongwithnospacessupercalifragilisticexpialidocious"
@@ -162,7 +159,7 @@ string value =
             SingleView <|
                 \() ->
                     Html.input
-                        [ Html.Attributes.value value
+                        [ Html.Attributes.value initialValue
                         , Html.Events.onInput string
                         ]
                         []
@@ -172,35 +169,56 @@ string value =
 {-| A `Control` that allows a Date (include date and time) input
 with a date picker UI.
 -}
-date : Date -> Control Date
-date value =
-    date_ DateTimePicker.initialState value
+date : Time.Zone -> Time.Posix -> Control Time.Posix
+date zone initialValue =
+    let
+        initialDateTime =
+            { year = Time.toYear zone initialValue
+            , month = Time.toMonth zone initialValue
+            , day = Time.toDay zone initialValue
+            , hour = Time.toHour zone initialValue
+            , minute = Time.toMinute zone initialValue
+            }
+
+        toPosix { year, month, day, hour, minute } =
+            Time.Extra.partsToPosix zone
+                { year = year
+                , month = month
+                , day = day
+                , hour = hour
+                , minute = minute
+                , second = 0
+                , millisecond = 0
+                }
+    in
+    date_ (DateTimePicker.initialStateWithToday initialDateTime) initialDateTime
+        |> map toPosix
 
 
-date_ : DateTimePicker.State -> Date -> Control Date
-date_ state value =
+date_ : DateTimePicker.State -> DateTimePicker.DateTime -> Control DateTimePicker.DateTime
+date_ state initialValue =
     Control
-        { currentValue = value
-        , allValues = \() -> [ value ] -- TODO
+        { currentValue = initialValue
+        , allValues = \() -> [ initialValue ] -- TODO
         , view =
             SingleView <|
                 \() ->
                     Html.span
-                        [ Html.Attributes.style
-                            [ ( "display", "inline-block" ) ]
+                        [ Html.Attributes.style "display" "inline-block"
                         ]
                         [ DateTimePicker.dateTimePicker
                             (\newState newDate ->
                                 case newDate of
                                     Nothing ->
-                                        date_ newState value
+                                        date_ newState initialValue
 
                                     Just d ->
                                         date_ newState d
                             )
                             []
                             state
-                            (Just value)
+                            (Just initialValue)
+                            |> Html.Styled.toUnstyled
                         ]
         }
 
@@ -216,7 +234,8 @@ choice : List ( String, Control a ) -> Control a
 choice choices =
     case choices of
         [] ->
-            Debug.crash "No choices given"
+            -- Debug.crash "No choices given"
+            choice choices
 
         first :: rest ->
             choice_ [] first rest
@@ -239,7 +258,7 @@ choice_ left current right =
             SingleView <|
                 \() ->
                     let
-                        option selected ( label, value ) =
+                        option selected ( label, _ ) =
                             Html.option
                                 [ Html.Attributes.selected selected ]
                                 [ Html.text label ]
@@ -266,7 +285,7 @@ choice_ left current right =
                                     all
                                         |> List.drop (i + 1)
                             in
-                            choice_ left_ current_ right_ |> Debug.log "new"
+                            choice_ left_ current_ right_
 
                         updateChild new =
                             choice_ left ( Tuple.first current, new ) right
@@ -309,7 +328,7 @@ list_ itemControl current min max =
             \() ->
                 [ 1, 0, 3 ]
                     |> List.filter (\x -> x > min && x < max)
-                    |> flip List.append [ min, max ]
+                    |> (\a -> List.append a [ min, max ])
                     |> List.map makeList
         , view =
             SingleView <|
@@ -320,7 +339,6 @@ list_ itemControl current min max =
                     in
                     Html.map
                         (String.toInt
-                            >> Result.toMaybe
                             >> Maybe.withDefault current
                             >> selectNew
                         )
@@ -329,10 +347,10 @@ list_ itemControl current min max =
                             [ Html.text ""
                             , Html.input
                                 [ Html.Attributes.type_ "range"
-                                , Html.Attributes.min <| toString min
-                                , Html.Attributes.max <| toString max
-                                , Html.Attributes.step <| toString 1
-                                , Html.Attributes.attribute "value" <| toString current
+                                , Html.Attributes.min <| String.fromInt min
+                                , Html.Attributes.max <| String.fromInt max
+                                , Html.Attributes.step <| String.fromInt 1
+                                , Html.Attributes.attribute "value" <| String.fromInt current
                                 , Html.Events.on "input" Html.Events.targetValue
                                 ]
                                 []
@@ -375,12 +393,12 @@ See [`record`](#record).
 
 -}
 field : String -> Control a -> Control (a -> b) -> Control b
-field name (Control value) (Control pipeline) =
+field name (Control control) (Control pipeline) =
     Control
-        { currentValue = pipeline.currentValue value.currentValue
+        { currentValue = pipeline.currentValue control.currentValue
         , allValues =
             \() ->
-                value.allValues ()
+                control.allValues ()
                     |> List.concatMap
                         (\v ->
                             List.map (\p -> p v)
@@ -391,14 +409,14 @@ field name (Control value) (Control pipeline) =
                 otherFields =
                     case pipeline.view of
                         FieldViews fs ->
-                            List.map (Tuple.mapSecond (\x -> \() -> Html.map (field name (Control value)) (x ())))
+                            List.map (Tuple.mapSecond (\x -> \() -> Html.map (field name (Control control)) (x ())))
                                 fs
 
                         _ ->
                             []
 
                 newView () =
-                    view_ (\v -> field name v (Control pipeline)) (Control value)
+                    view_ (\v -> field name v (Control pipeline)) (Control control)
             in
             FieldViews (( name, newView ) :: otherFields)
         }
@@ -409,8 +427,8 @@ field name (Control value) (Control pipeline) =
 map : (a -> b) -> Control a -> Control b
 map fn (Control a) =
     let
-        mapTuple ( label, value ) =
-            ( label, map fn value )
+        mapTuple ( label, control ) =
+            ( label, map fn control )
     in
     Control
         { currentValue = fn a.currentValue
@@ -449,40 +467,34 @@ allValues (Control c) =
 view : (Control a -> msg) -> Control a -> Html msg
 view msg (Control c) =
     let
-        fieldRow ( name, view ) =
+        fieldRow ( name, fieldView ) =
             Html.tr []
                 [ Html.td
-                    [ Html.Attributes.style [ ( "text-align", "right" ) ] ]
+                    [ Html.Attributes.style "text-align" "right" ]
                     [ Html.text name ]
                 , Html.td [] [ Html.text " = " ]
-                , Html.td [] [ view () ]
+                , Html.td [] [ fieldView () ]
                 ]
     in
     Html.div []
-        [ [ DateTimePicker.Css.css ]
-            |> Css.compile
-            |> .css
-            |> Html.CssHelpers.style
-        , view_ msg (Control c)
+        [ view_ msg (Control c)
         ]
 
 
 view_ : (Control a -> msg) -> Control a -> Html msg
 view_ msg (Control c) =
     let
-        fieldRow ( name, view ) =
+        fieldRow ( name, fieldView ) =
             Html.tr
-                [ Html.Attributes.style
-                    [ ( "vertical-align", "text-top" ) ]
+                [ Html.Attributes.style "vertical-align" "text-top"
                 ]
                 [ Html.td [] [ Html.text "," ]
                 , Html.td
-                    [ Html.Attributes.style
-                        [ ( "text-align", "right" ) ]
+                    [ Html.Attributes.style "text-align" "right"
                     ]
                     [ Html.text name ]
                 , Html.td [] [ Html.text " = " ]
-                , Html.td [] [ view () ]
+                , Html.td [] [ fieldView () ]
                 ]
     in
     case c.view of
@@ -495,8 +507,7 @@ view_ msg (Control c) =
         FieldViews fs ->
             List.concat
                 [ [ Html.tr
-                        [ Html.Attributes.style
-                            [ ( "vertical-align", "text-top" ) ]
+                        [ Html.Attributes.style "vertical-align" "text-top"
                         ]
                         [ Html.td [] [ Html.text "{" ] ]
                   ]

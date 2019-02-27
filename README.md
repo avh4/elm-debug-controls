@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/avh4/elm-debug-controls.svg?branch=master)](https://travis-ci.org/avh4/elm-debug-controls)
+[![Latest Version](https://img.shields.io/elm-package/v/avh4/elm-debug-controls.svg?label=version)](https://package.elm-lang.org/packages/avh4/elm-debug-controls/latest/)
+
 # elm-debug-controls
 
 This package helps you easily build interactive UIs for complex data structures.
@@ -13,13 +16,13 @@ https://avh4.github.io/elm-debug-controls/
 Suppose we have an Elm data structure like the following and want to create a simple debugging tool to experiment with different values:
 
 ```elm
-import Date exposing (Date)
+import Time
 
 type alias UploadRequest =
     { path : String
     , mode : WriteMode
     , autorename : Bool
-    , clientModified : Maybe Date
+    , clientModified : Maybe Time.Posix
     , mute : Bool
     , content : String
     }
@@ -59,7 +62,7 @@ init =
                 )
             |> field "autorename" (bool False)
             |> field "clientModified"
-                (maybe False <| date <| Date.fromTime 0)
+                (maybe False <| date Time.utc <| Time.millisToPosix 0)
             |> field "mute" (bool False)
             |> field "content" (string "HELLO.")
     }

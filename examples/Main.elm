@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Main exposing (Model, Msg(..), WhichExample(..), choiceControl, initialModel, main, stringControl, update, view)
 
 import AnimalExample
 import BeautifulExample
@@ -64,8 +64,8 @@ update msg model =
         ChangeAnimal animal ->
             { model | animal = animal }
 
-        DropboxMsg msg ->
-            { model | dropbox = DropboxExample.update msg model.dropbox }
+        DropboxMsg dropboxMsg ->
+            { model | dropbox = DropboxExample.update dropboxMsg model.dropbox }
 
         ChangeChoice choice ->
             { model | choice = choice }
@@ -102,9 +102,9 @@ view model =
         ]
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    BeautifulExample.beginnerProgram
+    BeautifulExample.sandbox
         { title = "elm-debug-controls"
         , details = Just """This package helps you easily create interactive and exhaustive views of complex data structures."""
         , color = Just Color.brown
@@ -112,7 +112,7 @@ main =
         , githubUrl = Just "https://github.com/avh4/elm-debug-controls"
         , documentationUrl = Just "http://package.elm-lang.org/packages/avh4/elm-debug-controls/latest"
         }
-        { model = initialModel
+        { init = initialModel
         , update = update
         , view = view
         }

@@ -1,4 +1,4 @@
-module AnimalExample exposing (..)
+module AnimalExample exposing (Animal(..), debugControl, view, viewAnimal)
 
 import Debug.Control exposing (Control, choice, list, map, string, value, values)
 import Html exposing (Html)
@@ -18,7 +18,7 @@ debugControl : Control (Maybe Animal)
 debugControl =
     let
         basicAnimal =
-            values [ Monkey, Giraffe, Eagle ]
+            values Debug.toString [ Monkey, Giraffe, Eagle ]
     in
     choice
         [ ( "Animal", map Just basicAnimal )
@@ -33,12 +33,10 @@ viewAnimal size animal =
     let
         svg url =
             Html.img
-                [ Html.style
-                    [ ( "width", toString size ++ "px" )
-                    , ( "height", toString size ++ "px" )
-                    , ( "overflow", "hidden" )
-                    , ( "vertical-align", "bottom" )
-                    ]
+                [ Html.style "width" (String.fromInt size ++ "px")
+                , Html.style "height" (String.fromInt size ++ "px")
+                , Html.style "overflow" "hidden"
+                , Html.style "vertical-align" "bottom"
                 , Html.src url
                 , Html.width size
                 ]
@@ -46,17 +44,15 @@ viewAnimal size animal =
 
         letters background color string =
             Html.div
-                [ Html.style
-                    [ ( "width", toString size ++ "px" )
-                    , ( "height", toString size ++ "px" )
-                    , ( "background-color", background )
-                    , ( "color", color )
-                    , ( "overflow", "hidden" )
-                    , ( "text-overflow", "ellipsis" )
-                    , ( "line-height", toString size ++ "px" )
-                    , ( "text-align", "center" )
-                    , ( "font-family", "sans-serif" )
-                    ]
+                [ Html.style "width" (String.fromInt size ++ "px")
+                , Html.style "height" (String.fromInt size ++ "px")
+                , Html.style "background-color" background
+                , Html.style "color" color
+                , Html.style "overflow" "hidden"
+                , Html.style "text-overflow" "ellipsis"
+                , Html.style "line-height" (String.fromInt size ++ "px")
+                , Html.style "text-align" "center"
+                , Html.style "font-family" "sans-serif"
                 ]
                 [ Html.text string ]
     in
@@ -87,12 +83,10 @@ viewAnimal size animal =
                         |> ceiling
             in
             Html.div
-                [ Html.style
-                    [ ( "width", toString size ++ "px" )
-                    , ( "height", toString size ++ "px" )
-                    , ( "background-color", "lightgreen" )
-                    , ( "line-height", "0" )
-                    ]
+                [ Html.style "width" (String.fromInt size ++ "px")
+                , Html.style "height" (String.fromInt size ++ "px")
+                , Html.style "background-color" "lightgreen"
+                , Html.style "line-height" "0"
                 ]
                 (List.map (Just >> viewAnimal (size // scale)) parts)
 
@@ -112,8 +106,8 @@ view control =
                     [ Html.td [] [ viewAnimal 50 data ]
                     , Html.td []
                         [ Html.code
-                            [ style [ ( "word-break", "break-all" ) ] ]
-                            [ Html.text (toString data) ]
+                            [ style "word-break" "break-all" ]
+                            [ Html.text (Debug.toString data) ]
                         ]
                     ]
                 ]

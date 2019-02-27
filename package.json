@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "test": "elm make && elm-test && npm run-script build-example && elm make --docs=documentation.json && npm run-script check && elm diff",
+    "build-example": "(cd examples && elm make Main.elm)",
+    "check": "elm-format --validate .",
+    "build-site": "mkdir -p docs && cp examples/*.svg docs/ && npm run-script build-example && cp examples/index.html docs/"
+  },
+  "devDependencies": {
+    "elm": "^0.19.0-bugfix6",
+    "elm-format": "^0.8.1",
+    "elm-test": "^0.19.0-rev5"
+  }
+}

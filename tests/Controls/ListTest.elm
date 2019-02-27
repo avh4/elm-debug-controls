@@ -8,7 +8,7 @@ import Test exposing (..)
 
 
 listControl =
-    Control.list <| Control.values [ "A", "B" ]
+    Control.list <| Control.values Debug.toString [ "A", "B" ]
 
 
 all : Test

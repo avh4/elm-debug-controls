@@ -1,8 +1,8 @@
 module DropboxExample exposing (Model, Msg, init, update, view)
 
-import Date exposing (Date)
 import Debug.Control as Control exposing (Control)
 import Html exposing (..)
+import Time
 
 
 type alias Model =
@@ -26,7 +26,7 @@ type alias UploadRequest =
     { path : String
     , mode : WriteMode
     , autorename : Bool
-    , clientModified : Maybe Date
+    , clientModified : Maybe Time.Posix
     , mute : Bool
     , content : String
     }
@@ -49,7 +49,7 @@ init =
                 )
             |> Control.field "autorename" (Control.bool False)
             |> Control.field "clientModified"
-                (Control.maybe False <| Control.date <| Date.fromTime 0)
+                (Control.maybe False <| Control.date Time.utc <| Time.millisToPosix 0)
             |> Control.field "mute" (Control.bool False)
             |> Control.field "content" (Control.string "HELLO.")
     }
@@ -101,7 +101,7 @@ record DownloadRequest
     { path : String
     , mode : WriteMode
     , autorename : Bool
-    , clientModified : Maybe Date
+    , clientModified : Maybe Time.Posix
     , mute : Bool
     , content : String
     }
@@ -125,7 +125,7 @@ record UploadRequest
         )
     |> field "autorename" (bool False)
     |> field "clientModified"
-        (maybe False <| date <| Date.fromTime 0)
+        (maybe False <| date Tim.utc <| Time.millisToPosix 0)
     |> field "mute" (bool False)
     |> field "content" (string "HELLO.")""" ]
         , Control.view UploadChange model.upload
