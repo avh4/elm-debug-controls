@@ -428,25 +428,38 @@ map : (a -> b) -> Control a -> Control b
 map fn (Control a) =
     Control
         { currentValue = fn a.currentValue
-        , allValues = \() -> List.map fn (a.allValues ())
-        , view =
-            case a.view of
-                NoView ->
-                    NoView
-
-                SingleView v ->
-                    SingleView <|
-                        \() -> Html.map (map fn) (v ())
-
-                FieldViews fs ->
-                    FieldViews <|
-                        List.map (Tuple.mapSecond (\v -> \() -> Html.map (map fn) (v ()))) fs
+        , allValues = mapAllValues fn a.allValues
+        , view = mapView fn a.view
         }
 
 
 andThen : (a -> Control b) -> Control a -> Control b
 andThen fn (Control a) =
     fn a.currentValue
+
+
+mapAllValues : (a -> b) -> (() -> List a) -> (() -> List b)
+mapAllValues fn allValues_ =
+    \() -> List.map fn (allValues_ ())
+
+
+mapView : (a -> b) -> ControlView a -> ControlView b
+mapView fn controlView =
+    case controlView of
+        NoView ->
+            NoView
+
+        SingleView v ->
+            SingleView <|
+                \() -> Html.map (map fn) (v ())
+
+        FieldViews fs ->
+            FieldViews <|
+                List.map
+                    (Tuple.mapSecond
+                        (\v -> \() -> Html.map (map fn) (v ()))
+                    )
+                    fs
 
 
 {-| Gets the current value of a `Control`.
