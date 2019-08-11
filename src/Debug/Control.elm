@@ -3,7 +3,7 @@ module Debug.Control exposing
     , value
     , bool, string, date
     , values, maybe, choice, list, record, field
-    , map
+    , map, andThen
     , view, currentValue, allValues
     )
 
@@ -13,7 +13,7 @@ module Debug.Control exposing
 @docs value
 @docs bool, string, date
 @docs values, maybe, choice, list, record, field
-@docs map
+@docs map, andThen
 
 @docs view, currentValue, allValues
 
@@ -446,6 +446,11 @@ map fn (Control a) =
                     FieldViews <|
                         List.map (Tuple.mapSecond (\v -> \() -> Html.map (map fn) (v ()))) fs
         }
+
+
+andThen : (a -> Control b) -> Control a -> Control b
+andThen fn (Control a) =
+    fn a.currentValue
 
 
 {-| Gets the current value of a `Control`.
