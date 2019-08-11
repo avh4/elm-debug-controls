@@ -426,10 +426,6 @@ field name (Control control) (Control pipeline) =
 -}
 map : (a -> b) -> Control a -> Control b
 map fn (Control a) =
-    let
-        mapTuple ( label, control ) =
-            ( label, map fn control )
-    in
     Control
         { currentValue = fn a.currentValue
         , allValues = \() -> List.map fn (a.allValues ())
