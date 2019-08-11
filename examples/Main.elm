@@ -7,6 +7,7 @@ import Debug.Control exposing (Control, choice, list, map, string, value, values
 import DropboxExample
 import Html exposing (..)
 import Html.Events exposing (onClick)
+import RecursionExample
 
 
 stringControl : Control String
@@ -26,6 +27,7 @@ type WhichExample
     = Animal
     | Dropbox
     | SimpleControls
+    | RecursionExample
 
 
 type alias Model =
@@ -34,6 +36,7 @@ type alias Model =
     , dropbox : DropboxExample.Model
     , choice : Control Bool
     , string : Control String
+    , recursionExample : Control RecursionExample.RecursiveType
     }
 
 
@@ -44,6 +47,7 @@ initialModel =
     , dropbox = DropboxExample.init
     , choice = choiceControl
     , string = stringControl
+    , recursionExample = RecursionExample.init
     }
 
 
@@ -53,6 +57,7 @@ type Msg
     | DropboxMsg DropboxExample.Msg
     | ChangeChoice (Control Bool)
     | ChangeString (Control String)
+    | ChangeRecursiveChoice (Control RecursionExample.RecursiveType)
 
 
 update : Msg -> Model -> Model
@@ -73,6 +78,9 @@ update msg model =
         ChangeString string ->
             { model | string = string }
 
+        ChangeRecursiveChoice choice ->
+            { model | recursionExample = choice }
+
 
 view : Model -> Html Msg
 view model =
@@ -82,6 +90,8 @@ view model =
         , button [ onClick (SwitchTo Animal) ] [ text "Union type example (Animal)" ]
         , br [] []
         , button [ onClick (SwitchTo SimpleControls) ] [ text "Simple controls" ]
+        , br [] []
+        , button [ onClick (SwitchTo RecursionExample) ] [ text "Recursion example" ]
         , br [] []
         , case model.which of
             Animal ->
@@ -98,6 +108,12 @@ view model =
                     , Debug.Control.view ChangeChoice model.choice
                     , h3 [] [ text "string" ]
                     , Debug.Control.view ChangeString model.string
+                    ]
+
+            RecursionExample ->
+                div []
+                    [ h3 [] [ text "initial choice" ]
+                    , Debug.Control.view ChangeRecursiveChoice model.recursionExample
                     ]
         ]
 
