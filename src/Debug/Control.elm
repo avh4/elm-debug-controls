@@ -491,16 +491,6 @@ allValues (Control c) =
 -}
 view : (Control a -> msg) -> Control a -> Html msg
 view msg (Control c) =
-    let
-        fieldRow ( name, fieldView ) =
-            Html.tr []
-                [ Html.td
-                    [ Html.Attributes.style "text-align" "right" ]
-                    [ Html.text name ]
-                , Html.td [] [ Html.text " = " ]
-                , Html.td [] [ fieldView () ]
-                ]
-    in
     Html.div []
         [ view_ msg (Control c)
         ]
