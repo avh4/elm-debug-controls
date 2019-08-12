@@ -37,9 +37,9 @@ import Time.Extra
 -}
 type Control a
     = Control
-        { currentValue : a
+        { currentValue : () -> a
         , allValues : () -> List a
-        , view : ControlView a
+        , view : () -> ControlView a
         }
 
 
@@ -54,9 +54,9 @@ type ControlView a
 value : a -> Control a
 value initial =
     Control
-        { currentValue = initial
+        { currentValue = \() -> initial
         , allValues = \() -> [ initial ]
-        , view = NoView
+        , view = \() -> NoView
         }
 
 
@@ -80,34 +80,36 @@ maybe : Bool -> Control a -> Control (Maybe a)
 maybe isJust (Control control) =
     Control
         { currentValue =
-            if isJust then
-                Just control.currentValue
+            \() ->
+                if isJust then
+                    Just (control.currentValue ())
 
-            else
-                Nothing
+                else
+                    Nothing
         , allValues =
             \() ->
                 Nothing
                     :: List.map Just (control.allValues ())
         , view =
-            SingleView <|
-                \() ->
-                    Html.span
-                        [ Html.Attributes.style "white-space" "nowrap"
-                        ]
-                        [ Html.input
-                            [ Html.Attributes.type_ "checkbox"
-                            , Html.Events.onCheck (\a -> maybe a (Control control))
-                            , Html.Attributes.checked isJust
+            \() ->
+                SingleView <|
+                    \() ->
+                        Html.span
+                            [ Html.Attributes.style "white-space" "nowrap"
                             ]
-                            []
-                        , Html.text " "
-                        , if isJust then
-                            view_ (maybe isJust) (Control control)
+                            [ Html.input
+                                [ Html.Attributes.type_ "checkbox"
+                                , Html.Events.onCheck (\a -> maybe a (Control control))
+                                , Html.Attributes.checked isJust
+                                ]
+                                []
+                            , Html.text " "
+                            , if isJust then
+                                view_ (maybe isJust) (Control control)
 
-                          else
-                            Html.text "Nothing"
-                        ]
+                              else
+                                Html.text "Nothing"
+                            ]
         }
 
 
@@ -116,30 +118,31 @@ maybe isJust (Control control) =
 bool : Bool -> Control Bool
 bool initialValue =
     Control
-        { currentValue = initialValue
+        { currentValue = \() -> initialValue
         , allValues =
             \() ->
                 [ initialValue
                 , not initialValue
                 ]
         , view =
-            SingleView <|
-                \() ->
-                    Html.span []
-                        [ Html.input
-                            [ Html.Attributes.type_ "checkbox"
-                            , Html.Events.onCheck bool
-                            , Html.Attributes.checked initialValue
-                            ]
-                            []
-                        , Html.text " "
-                        , case initialValue of
-                            True ->
-                                Html.text "True"
+            \() ->
+                SingleView <|
+                    \() ->
+                        Html.span []
+                            [ Html.input
+                                [ Html.Attributes.type_ "checkbox"
+                                , Html.Events.onCheck bool
+                                , Html.Attributes.checked initialValue
+                                ]
+                                []
+                            , Html.text " "
+                            , case initialValue of
+                                True ->
+                                    Html.text "True"
 
-                            False ->
-                                Html.text "False"
-                        ]
+                                False ->
+                                    Html.text "False"
+                            ]
         }
 
 
@@ -148,7 +151,7 @@ bool initialValue =
 string : String -> Control String
 string initialValue =
     Control
-        { currentValue = initialValue
+        { currentValue = \() -> initialValue
         , allValues =
             \() ->
                 [ initialValue
@@ -158,13 +161,14 @@ string initialValue =
                 , "Long text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
                 ]
         , view =
-            SingleView <|
-                \() ->
-                    Html.input
-                        [ Html.Attributes.value initialValue
-                        , Html.Events.onInput string
-                        ]
-                        []
+            \() ->
+                SingleView <|
+                    \() ->
+                        Html.input
+                            [ Html.Attributes.value initialValue
+                            , Html.Events.onInput string
+                            ]
+                            []
         }
 
 
@@ -200,28 +204,29 @@ date zone initialValue =
 date_ : DateTimePicker.State -> DateTimePicker.DateTime -> Control DateTimePicker.DateTime
 date_ state initialValue =
     Control
-        { currentValue = initialValue
+        { currentValue = \() -> initialValue
         , allValues = \() -> [ initialValue ] -- TODO
         , view =
-            SingleView <|
-                \() ->
-                    Html.span
-                        [ Html.Attributes.style "display" "inline-block"
-                        ]
-                        [ DateTimePicker.dateTimePicker
-                            (\newState newDate ->
-                                case newDate of
-                                    Nothing ->
-                                        date_ newState initialValue
+            \() ->
+                SingleView <|
+                    \() ->
+                        Html.span
+                            [ Html.Attributes.style "display" "inline-block"
+                            ]
+                            [ DateTimePicker.dateTimePicker
+                                (\newState newDate ->
+                                    case newDate of
+                                        Nothing ->
+                                            date_ newState initialValue
 
-                                    Just d ->
-                                        date_ newState d
-                            )
-                            []
-                            state
-                            (Just initialValue)
-                            |> Html.Styled.toUnstyled
-                        ]
+                                        Just d ->
+                                            date_ newState d
+                                )
+                                []
+                                state
+                                (Just initialValue)
+                                |> Html.Styled.toUnstyled
+                            ]
         }
 
 
@@ -250,61 +255,62 @@ choice_ :
     -> Control a
 choice_ left current right =
     Control
-        { currentValue = current |> Tuple.second |> currentValue
+        { currentValue = \() -> current |> Tuple.second |> currentValue
         , allValues =
             \() ->
                 (List.reverse left ++ [ current ] ++ right)
                     |> List.map (Tuple.second >> allValues)
                     |> List.concat
         , view =
-            SingleView <|
-                \() ->
-                    let
-                        option selected ( label, _ ) =
-                            Html.option
-                                [ Html.Attributes.selected selected ]
-                                [ Html.text label ]
+            \() ->
+                SingleView <|
+                    \() ->
+                        let
+                            option selected ( label, _ ) =
+                                Html.option
+                                    [ Html.Attributes.selected selected ]
+                                    [ Html.text label ]
 
-                        selectNew i =
-                            let
-                                all =
-                                    List.reverse left
-                                        ++ [ current ]
-                                        ++ right
+                            selectNew i =
+                                let
+                                    all =
+                                        List.reverse left
+                                            ++ [ current ]
+                                            ++ right
 
-                                left_ =
-                                    all
-                                        |> List.take i
-                                        |> List.reverse
+                                    left_ =
+                                        all
+                                            |> List.take i
+                                            |> List.reverse
 
-                                current_ =
-                                    all
-                                        |> List.drop i
-                                        |> List.head
-                                        |> Maybe.withDefault current
+                                    current_ =
+                                        all
+                                            |> List.drop i
+                                            |> List.head
+                                            |> Maybe.withDefault current
 
-                                right_ =
-                                    all
-                                        |> List.drop (i + 1)
-                            in
-                            choice_ left_ current_ right_
+                                    right_ =
+                                        all
+                                            |> List.drop (i + 1)
+                                in
+                                choice_ left_ current_ right_
 
-                        updateChild new =
-                            choice_ left ( Tuple.first current, new ) right
-                    in
-                    Html.div []
-                        [ Html.map selectNew <|
-                            Html.select
-                                [ Html.Events.on "change" (Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int)
-                                ]
-                            <|
-                                List.concat
-                                    [ List.map (option False) <| List.reverse left
-                                    , [ option True current ]
-                                    , List.map (option False) right
+                            updateChild new =
+                                choice_ left ( Tuple.first current, new ) right
+                        in
+                        Html.div []
+                            [ Html.map selectNew <|
+                                Html.select
+                                    [ Html.Events.on "change" (Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int)
                                     ]
-                        , view_ updateChild (Tuple.second current)
-                        ]
+                                <|
+                                    List.concat
+                                        [ List.map (option False) <| List.reverse left
+                                        , [ option True current ]
+                                        , List.map (option False) right
+                                        ]
+                            , view_ updateChild (Tuple.second current)
+                            ]
         }
 
 
@@ -325,7 +331,7 @@ list_ itemControl current min max =
                 |> List.take n
     in
     Control
-        { currentValue = makeList current
+        { currentValue = \() -> makeList current
         , allValues =
             \() ->
                 [ 1, 0, 3 ]
@@ -333,30 +339,31 @@ list_ itemControl current min max =
                     |> (\a -> List.append a [ min, max ])
                     |> List.map makeList
         , view =
-            SingleView <|
-                \() ->
-                    let
-                        selectNew new =
-                            list_ itemControl new min max
-                    in
-                    Html.map
-                        (String.toInt
-                            >> Maybe.withDefault current
-                            >> selectNew
-                        )
-                    <|
-                        Html.label []
-                            [ Html.text ""
-                            , Html.input
-                                [ Html.Attributes.type_ "range"
-                                , Html.Attributes.min <| String.fromInt min
-                                , Html.Attributes.max <| String.fromInt max
-                                , Html.Attributes.step <| String.fromInt 1
-                                , Html.Attributes.attribute "value" <| String.fromInt current
-                                , Html.Events.on "input" Html.Events.targetValue
+            \() ->
+                SingleView <|
+                    \() ->
+                        let
+                            selectNew new =
+                                list_ itemControl new min max
+                        in
+                        Html.map
+                            (String.toInt
+                                >> Maybe.withDefault current
+                                >> selectNew
+                            )
+                        <|
+                            Html.label []
+                                [ Html.text ""
+                                , Html.input
+                                    [ Html.Attributes.type_ "range"
+                                    , Html.Attributes.min <| String.fromInt min
+                                    , Html.Attributes.max <| String.fromInt max
+                                    , Html.Attributes.step <| String.fromInt 1
+                                    , Html.Attributes.attribute "value" <| String.fromInt current
+                                    , Html.Events.on "input" Html.Events.targetValue
+                                    ]
+                                    []
                                 ]
-                                []
-                            ]
         }
 
 
@@ -383,9 +390,9 @@ You will use this with `field`.
 record : a -> Control a
 record fn =
     Control
-        { currentValue = fn
+        { currentValue = \() -> fn
         , allValues = \() -> [ fn ]
-        , view = FieldViews []
+        , view = \() -> FieldViews []
         }
 
 
@@ -397,7 +404,7 @@ See [`record`](#record).
 field : String -> Control a -> Control (a -> b) -> Control b
 field name (Control control) (Control pipeline) =
     Control
-        { currentValue = pipeline.currentValue control.currentValue
+        { currentValue = \() -> pipeline.currentValue () (control.currentValue ())
         , allValues =
             \() ->
                 control.allValues ()
@@ -407,20 +414,21 @@ field name (Control control) (Control pipeline) =
                                 (pipeline.allValues ())
                         )
         , view =
-            let
-                otherFields =
-                    case pipeline.view of
-                        FieldViews fs ->
-                            List.map (Tuple.mapSecond (\x -> \() -> Html.map (field name (Control control)) (x ())))
-                                fs
+            \() ->
+                let
+                    otherFields =
+                        case pipeline.view () of
+                            FieldViews fs ->
+                                List.map (Tuple.mapSecond (\x -> \() -> Html.map (field name (Control control)) (x ())))
+                                    fs
 
-                        _ ->
-                            []
+                            _ ->
+                                []
 
-                newView () =
-                    view_ (\v -> field name v (Control pipeline)) (Control control)
-            in
-            FieldViews (( name, newView ) :: otherFields)
+                    newView () =
+                        view_ (\v -> field name v (Control pipeline)) (Control control)
+                in
+                FieldViews (( name, newView ) :: otherFields)
         }
 
 
@@ -429,9 +437,9 @@ field name (Control control) (Control pipeline) =
 map : (a -> b) -> Control a -> Control b
 map fn (Control a) =
     Control
-        { currentValue = fn a.currentValue
+        { currentValue = \() -> fn (a.currentValue ())
         , allValues = mapAllValues fn a.allValues
-        , view = mapView fn a.view
+        , view = \() -> mapView fn (a.view ())
         }
 
 
@@ -469,7 +477,7 @@ mapView fn controlView =
 -}
 currentValue : Control a -> a
 currentValue (Control c) =
-    c.currentValue
+    c.currentValue ()
 
 
 {-| TODO: revise API
@@ -514,7 +522,7 @@ view_ msg (Control c) =
                 , Html.td [] [ fieldView () ]
                 ]
     in
-    case c.view of
+    case c.view () of
         NoView ->
             Html.text ""
 
