@@ -440,7 +440,15 @@ map fn (Control a) =
 {-| -}
 lazy : (() -> Control a) -> Control a
 lazy fn =
-    fn ()
+    let
+        unwrap (Control v) =
+            v
+    in
+    Control
+        { currentValue = \() -> (unwrap (fn ())).currentValue ()
+        , allValues = \() -> (unwrap (fn ())).allValues ()
+        , view = \() -> (unwrap (fn ())).view ()
+        }
 
 
 mapAllValues : (a -> b) -> (() -> List a) -> (() -> List b)

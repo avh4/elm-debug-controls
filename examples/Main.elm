@@ -111,10 +111,8 @@ view model =
                     ]
 
             RecursionExample ->
-                div []
-                    [ h3 [] [ text "initial choice" ]
-                    , Debug.Control.view ChangeRecursiveChoice model.recursionExample
-                    ]
+                RecursionExample.view model.recursionExample
+                    |> Html.map ChangeRecursiveChoice
         ]
 
 
