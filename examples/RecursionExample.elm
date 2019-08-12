@@ -12,16 +12,14 @@ type RecursiveType
 
 init : Control RecursiveType
 init =
-    Debug.Control.andThen
+    --Debug.Control.andThen
+    Debug.Control.map
         (\b ->
-            if b then
-                Debug.Control.map
-                    (\child -> RecursiveType { choice = b, child = Just child })
-                    init
-
-            else
-                Debug.Control.value
-                    (RecursiveType { choice = b, child = Nothing })
+            --        if b then
+            --                (\child -> RecursiveType { choice = b, child = Just child })
+            --                init
+            --        else
+            RecursiveType { choice = b, child = Nothing }
         )
         (Debug.Control.bool False)
 

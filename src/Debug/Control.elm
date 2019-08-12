@@ -3,8 +3,9 @@ module Debug.Control exposing
     , value
     , bool, string, date
     , values, maybe, choice, list, record, field
-    , map, andThen
+    , map
     , view, currentValue, allValues
+    , lazy
     )
 
 {-| Create interactive controls for complex data structures.
@@ -13,9 +14,10 @@ module Debug.Control exposing
 @docs value
 @docs bool, string, date
 @docs values, maybe, choice, list, record, field
-@docs map, andThen
+@docs map
 
 @docs view, currentValue, allValues
+@docs lazy
 
 -}
 
@@ -433,9 +435,10 @@ map fn (Control a) =
         }
 
 
-andThen : (a -> Control b) -> Control a -> Control b
-andThen fn (Control a) =
-    fn a.currentValue
+{-| -}
+lazy : (() -> Control a) -> Control a
+lazy fn =
+    fn ()
 
 
 mapAllValues : (a -> b) -> (() -> List a) -> (() -> List b)
