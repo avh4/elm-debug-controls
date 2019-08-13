@@ -7,7 +7,7 @@ import String
 
 
 type RecursiveType
-    = RecursiveType { child : Maybe RecursiveType }
+    = RecursiveType (Maybe RecursiveType)
 
 
 init : Control RecursiveType
@@ -16,7 +16,7 @@ init =
         [ ( "No child", value Nothing )
         , ( "child", lazy (\() -> init) |> map Just )
         ]
-        |> map (\child -> RecursiveType { child = child })
+        |> map RecursiveType
 
 
 view : Control RecursiveType -> Html (Control RecursiveType)

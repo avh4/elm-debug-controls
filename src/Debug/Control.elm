@@ -390,7 +390,22 @@ map fn (Control a) =
         }
 
 
-{-| -}
+{-| Use lazy when working with recursive types:
+
+    import Debug.Control as Control exposing (Control)
+
+    type RecursiveType
+        = RecursiveType (Maybe RecursiveType)
+
+    recursiveTypeControl : Control RecursiveType
+    recursiveTypeControl =
+        Control.choice
+            [ ( "No child", Control.value Nothing )
+            , ( "child", Control.lazy (\() -> recursiveTypeControl) |> Control.map Just )
+            ]
+            |> Control.map RecursiveType
+
+-}
 lazy : (() -> Control a) -> Control a
 lazy fn =
     let
