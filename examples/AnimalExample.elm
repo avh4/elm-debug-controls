@@ -16,13 +16,9 @@ type Animal
 
 debugControl : Control (Maybe Animal)
 debugControl =
-    let
-        basicAnimal =
-            values Debug.toString [ Monkey, Giraffe, Eagle ]
-    in
     choice
-        [ ( "Animal", map Just basicAnimal )
-        , ( "Chimera", map (Just << Chimera) (list basicAnimal) )
+        [ ( "Animal", map Just (values Debug.toString [ Monkey, Giraffe, Eagle ]) )
+        , ( "Chimera", map (Just << Chimera) (list [ value Monkey, value Giraffe, value Eagle ]) )
         , ( "Custom", map (Just << CustomAnimal) (string "Zebra") )
         , ( "Nothing", value Nothing )
         ]
@@ -125,9 +121,6 @@ view control =
         , h "Interactive control"
         , Debug.Control.view identity control
         , showData (Debug.Control.currentValue control)
-        , h "All possible values"
-        , List.map showData (Debug.Control.allValues control)
-            |> Html.div []
         , Html.hr [] []
         , Html.a [ Html.href "https://github.com/avh4/elm-debug-controls/blob/master/examples/LICENSE.md#images" ]
             [ Html.text "Image credits" ]

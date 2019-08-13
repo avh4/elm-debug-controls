@@ -1,14 +1,15 @@
 module Controls.ListTest exposing (all)
 
-import Debug.Control as Control
+import Debug.Control as Control exposing (Control)
 import Expect
 import Html
 import Html.Attributes as Html
 import Test exposing (..)
 
 
+listControl : Control (List String)
 listControl =
-    Control.list <| Control.values Debug.toString [ "A", "B" ]
+    Control.list (List.map Control.value [ "A", "B" ])
 
 
 all : Test
