@@ -4,7 +4,7 @@ module Debug.Control exposing
     , bool, string, date
     , values, maybe, choice, list, record, field
     , map
-    , view, currentValue
+    , view, currentValue, allValues
     , lazy
     )
 
@@ -16,7 +16,7 @@ module Debug.Control exposing
 @docs values, maybe, choice, list, record, field
 @docs map
 
-@docs view, currentValue
+@docs view, currentValue, allValues
 @docs lazy
 
 -}
@@ -38,6 +38,7 @@ import Time.Extra
 type Control a
     = Control
         { currentValue : () -> a
+        , allValues : () -> List a
         , view : () -> ControlView a
         }
 
@@ -54,6 +55,7 @@ value : a -> Control a
 value initial =
     Control
         { currentValue = \() -> initial
+        , allValues = \() -> [ initial ]
         , view = \() -> NoView
         }
 
@@ -84,6 +86,10 @@ maybe isJust (Control control) =
 
                 else
                     Nothing
+        , allValues =
+            \() ->
+                Nothing
+                    :: List.map Just (control.allValues ())
         , view =
             \() ->
                 SingleView <|
@@ -112,6 +118,11 @@ bool : Bool -> Control Bool
 bool initialValue =
     Control
         { currentValue = \() -> initialValue
+        , allValues =
+            \() ->
+                [ initialValue
+                , not initialValue
+                ]
         , view =
             \() ->
                 SingleView <|
@@ -139,6 +150,14 @@ string : String -> Control String
 string initialValue =
     Control
         { currentValue = \() -> initialValue
+        , allValues =
+            \() ->
+                [ initialValue
+                , ""
+                , "short"
+                , "Longwordyesverylongwithnospacessupercalifragilisticexpialidocious"
+                , "Long text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                ]
         , view =
             \() ->
                 SingleView <|
@@ -183,6 +202,7 @@ date_ : DateTimePicker.State -> DateTimePicker.DateTime -> Control DateTimePicke
 date_ state initialValue =
     Control
         { currentValue = \() -> initialValue
+        , allValues = \() -> [ initialValue ] -- TODO
         , view =
             \() ->
                 SingleView <|
@@ -232,6 +252,11 @@ choice_ :
 choice_ left current right =
     Control
         { currentValue = \() -> current |> Tuple.second |> currentValue
+        , allValues =
+            \() ->
+                (List.reverse left ++ [ current ] ++ right)
+                    |> List.map (Tuple.second >> allValues)
+                    |> List.concat
         , view =
             \() ->
                 SingleView <|
@@ -286,41 +311,53 @@ choice_ left current right =
 
 {-| A `Control` that provides a list of selected length.
 -}
-list : List (Control a) -> Control (List a)
-list controls =
-    list_ controls 1
+list : Control a -> Control (List a)
+list itemControl =
+    list_ itemControl 1 0 10
 
 
-list_ : List (Control a) -> Int -> Control (List a)
-list_ allValues currentIndex =
+list_ : Control a -> Int -> Int -> Int -> Control (List a)
+list_ itemControl current min max =
     let
-        unwrap (Control v) =
-            v
-
-        max =
-            List.length allValues
+        makeList n =
+            allValues itemControl
+                |> List.repeat n
+                |> List.concat
+                |> List.take n
     in
     Control
-        { currentValue =
+        { currentValue = \() -> makeList current
+        , allValues =
             \() ->
-                List.take currentIndex allValues
-                    |> List.map (\control -> (unwrap >> .currentValue) control ())
+                [ 1, 0, 3 ]
+                    |> List.filter (\x -> x > min && x < max)
+                    |> (\a -> List.append a [ min, max ])
+                    |> List.map makeList
         , view =
             \() ->
-                Html.label []
-                    [ Html.text ""
-                    , Html.input
-                        [ Html.Attributes.type_ "range"
-                        , Html.Attributes.min (String.fromInt 0)
-                        , Html.Attributes.max (String.fromInt max)
-                        , Html.Attributes.step (String.fromInt 1)
-                        , Html.Attributes.attribute "value" (String.fromInt currentIndex)
-                        , Html.Events.on "input" Html.Events.targetValue
-                        ]
-                        []
-                    ]
-                    |> Html.map (String.toInt >> Maybe.withDefault currentIndex >> list_ allValues)
-                    |> SingleView
+                SingleView <|
+                    let
+                        selectNew new =
+                            list_ itemControl new min max
+                    in
+                    Html.map
+                        (String.toInt
+                            >> Maybe.withDefault current
+                            >> selectNew
+                        )
+                    <|
+                        Html.label []
+                            [ Html.text ""
+                            , Html.input
+                                [ Html.Attributes.type_ "range"
+                                , Html.Attributes.min <| String.fromInt min
+                                , Html.Attributes.max <| String.fromInt max
+                                , Html.Attributes.step <| String.fromInt 1
+                                , Html.Attributes.attribute "value" <| String.fromInt current
+                                , Html.Events.on "input" Html.Events.targetValue
+                                ]
+                                []
+                            ]
         }
 
 
@@ -348,6 +385,7 @@ record : a -> Control a
 record fn =
     Control
         { currentValue = \() -> fn
+        , allValues = \() -> [ fn ]
         , view = \() -> FieldViews []
         }
 
@@ -361,6 +399,14 @@ field : String -> Control a -> Control (a -> b) -> Control b
 field name (Control control) (Control pipeline) =
     Control
         { currentValue = \() -> pipeline.currentValue () (control.currentValue ())
+        , allValues =
+            \() ->
+                control.allValues ()
+                    |> List.concatMap
+                        (\v ->
+                            List.map (\p -> p v)
+                                (pipeline.allValues ())
+                        )
         , view =
             \() ->
                 let
@@ -386,6 +432,7 @@ map : (a -> b) -> Control a -> Control b
 map fn (Control a) =
     Control
         { currentValue = \() -> fn (a.currentValue ())
+        , allValues = mapAllValues fn a.allValues
         , view = \() -> mapView fn (a.view ())
         }
 
@@ -414,8 +461,14 @@ lazy fn =
     in
     Control
         { currentValue = \() -> (unwrap (fn ())).currentValue ()
+        , allValues = \() -> (unwrap (fn ())).allValues ()
         , view = \() -> (unwrap (fn ())).view ()
         }
+
+
+mapAllValues : (a -> b) -> (() -> List a) -> (() -> List b)
+mapAllValues fn allValues_ =
+    \() -> List.map fn (allValues_ ())
 
 
 mapView : (a -> b) -> ControlView a -> ControlView b
@@ -437,6 +490,13 @@ mapView fn controlView =
 currentValue : Control a -> a
 currentValue (Control c) =
     c.currentValue ()
+
+
+{-| TODO: revise API
+-}
+allValues : Control a -> List a
+allValues (Control c) =
+    c.allValues ()
 
 
 {-| Renders the interactive UI for a `Control`.

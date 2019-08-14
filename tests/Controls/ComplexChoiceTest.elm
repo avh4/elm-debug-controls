@@ -46,4 +46,13 @@ all =
                         , Query.has [ tag "option", text "Monkey" ]
                         , Query.has [ tag "option", text "Giraffe" ]
                         ]
+        , test "allValues" <|
+            \() ->
+                maybeControls
+                    |> Control.allValues
+                    |> Expect.equal
+                        [ Just Monkey
+                        , Just Giraffe
+                        , Nothing
+                        ]
         ]
