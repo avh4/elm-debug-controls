@@ -39,12 +39,4 @@ all =
                         [ Query.has [ tag "option", text "No child" ]
                         , Query.has [ tag "option", text "child" ]
                         ]
-        --, test "allValues" <|
-        --    \() ->
-        --        controls
-        --            |> Control.allValues
-        --            |> Expect.equal
-        --                [ RecursiveType Nothing
-        --                , RecursiveType (Just (RecursiveType Nothing))
-        --                ]
         ]
