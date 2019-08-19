@@ -4576,12 +4576,8 @@ var author$project$Debug$Control$allValues = function (_n0) {
 };
 var author$project$Debug$Control$currentValue = function (_n0) {
 	var c = _n0.a;
-	return c.currentValue;
+	return c.currentValue(_Utils_Tuple0);
 };
-var elm$core$Basics$apL = F2(
-	function (f, x) {
-		return f(x);
-	});
 var elm$core$Basics$apR = F2(
 	function (x, f) {
 		return f(x);
@@ -4767,6 +4763,10 @@ var elm$core$Array$treeFromBuilder = F2(
 				continue treeFromBuilder;
 			}
 		}
+	});
+var elm$core$Basics$apL = F2(
+	function (f, x) {
+		return f(x);
 	});
 var elm$core$Basics$floor = _Basics_floor;
 var elm$core$Basics$max = F2(
@@ -5083,62 +5083,57 @@ var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var author$project$Debug$Control$view_ = F2(
 	function (msg, _n0) {
 		var c = _n0.a;
-		var fieldRow = function (_n2) {
-			var name = _n2.a;
-			var fieldView = _n2.b;
-			return A2(
-				elm$html$Html$tr,
-				_List_fromArray(
-					[
-						A2(elm$html$Html$Attributes$style, 'vertical-align', 'text-top')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						elm$html$Html$td,
-						_List_Nil,
-						_List_fromArray(
-							[
-								elm$html$Html$text(',')
-							])),
-						A2(
-						elm$html$Html$td,
-						_List_fromArray(
-							[
-								A2(elm$html$Html$Attributes$style, 'text-align', 'right')
-							]),
-						_List_fromArray(
-							[
-								elm$html$Html$text(name)
-							])),
-						A2(
-						elm$html$Html$td,
-						_List_Nil,
-						_List_fromArray(
-							[
-								elm$html$Html$text(' = ')
-							])),
-						A2(
-						elm$html$Html$td,
-						_List_Nil,
-						_List_fromArray(
-							[
-								fieldView(_Utils_Tuple0)
-							]))
-					]));
-		};
-		var _n1 = c.view;
+		var _n1 = c.view(_Utils_Tuple0);
 		switch (_n1.$) {
 			case 'NoView':
 				return elm$html$Html$text('');
 			case 'SingleView':
 				var v = _n1.a;
-				return A2(
-					elm$html$Html$map,
-					msg,
-					v(_Utils_Tuple0));
+				return A2(elm$html$Html$map, msg, v);
 			default:
 				var fs = _n1.a;
+				var fieldRow = function (_n2) {
+					var name = _n2.a;
+					var fieldView = _n2.b;
+					return A2(
+						elm$html$Html$tr,
+						_List_fromArray(
+							[
+								A2(elm$html$Html$Attributes$style, 'vertical-align', 'text-top')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text(',')
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_fromArray(
+									[
+										A2(elm$html$Html$Attributes$style, 'text-align', 'right')
+									]),
+								_List_fromArray(
+									[
+										elm$html$Html$text(name)
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text(' = ')
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[fieldView]))
+							]));
+				};
 				return A2(
 					elm$html$Html$map,
 					msg,
@@ -5409,87 +5404,91 @@ var author$project$Debug$Control$choice_ = F3(
 										[current]),
 									right))));
 				},
-				currentValue: author$project$Debug$Control$currentValue(current.b),
-				view: author$project$Debug$Control$SingleView(
-					function (_n1) {
-						var updateChild = function (_new) {
-							return A3(
-								author$project$Debug$Control$choice_,
-								left,
-								_Utils_Tuple2(current.a, _new),
-								right);
-						};
-						var selectNew = function (i) {
-							var all = _Utils_ap(
-								elm$core$List$reverse(left),
-								_Utils_ap(
-									_List_fromArray(
-										[current]),
-									right));
-							var current_ = A2(
-								elm$core$Maybe$withDefault,
-								current,
-								elm$core$List$head(
-									A2(elm$core$List$drop, i, all)));
-							var left_ = elm$core$List$reverse(
-								A2(elm$core$List$take, i, all));
-							var right_ = A2(elm$core$List$drop, i + 1, all);
-							return A3(author$project$Debug$Control$choice_, left_, current_, right_);
-						};
-						var option = F2(
-							function (selected, _n2) {
-								var label = _n2.a;
-								return A2(
-									elm$html$Html$option,
-									_List_fromArray(
-										[
-											elm$html$Html$Attributes$selected(selected)
-										]),
-									_List_fromArray(
-										[
-											elm$html$Html$text(label)
-										]));
-							});
-						return A2(
-							elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									elm$html$Html$map,
-									selectNew,
-									A2(
-										elm$html$Html$select,
+				currentValue: function (_n1) {
+					return author$project$Debug$Control$currentValue(current.b);
+				},
+				view: function (_n2) {
+					return author$project$Debug$Control$SingleView(
+						function () {
+							var updateChild = function (_new) {
+								return A3(
+									author$project$Debug$Control$choice_,
+									left,
+									_Utils_Tuple2(current.a, _new),
+									right);
+							};
+							var selectNew = function (i) {
+								var all = _Utils_ap(
+									elm$core$List$reverse(left),
+									_Utils_ap(
+										_List_fromArray(
+											[current]),
+										right));
+								var current_ = A2(
+									elm$core$Maybe$withDefault,
+									current,
+									elm$core$List$head(
+										A2(elm$core$List$drop, i, all)));
+								var left_ = elm$core$List$reverse(
+									A2(elm$core$List$take, i, all));
+								var right_ = A2(elm$core$List$drop, i + 1, all);
+								return A3(author$project$Debug$Control$choice_, left_, current_, right_);
+							};
+							var option = F2(
+								function (selected, _n3) {
+									var label = _n3.a;
+									return A2(
+										elm$html$Html$option,
 										_List_fromArray(
 											[
-												A2(
-												elm$html$Html$Events$on,
-												'change',
-												A2(
-													elm$json$Json$Decode$at,
-													_List_fromArray(
-														['target', 'selectedIndex']),
-													elm$json$Json$Decode$int))
+												elm$html$Html$Attributes$selected(selected)
 											]),
-										elm$core$List$concat(
+										_List_fromArray(
+											[
+												elm$html$Html$text(label)
+											]));
+								});
+							return A2(
+								elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$map,
+										selectNew,
+										A2(
+											elm$html$Html$select,
 											_List_fromArray(
 												[
 													A2(
-													elm$core$List$map,
-													option(false),
-													elm$core$List$reverse(left)),
-													_List_fromArray(
-													[
-														A2(option, true, current)
-													]),
+													elm$html$Html$Events$on,
+													'change',
 													A2(
-													elm$core$List$map,
-													option(false),
-													right)
-												])))),
-									A2(author$project$Debug$Control$view_, updateChild, current.b)
-								]));
-					})
+														elm$json$Json$Decode$at,
+														_List_fromArray(
+															['target', 'selectedIndex']),
+														elm$json$Json$Decode$int))
+												]),
+											elm$core$List$concat(
+												_List_fromArray(
+													[
+														A2(
+														elm$core$List$map,
+														option(false),
+														elm$core$List$reverse(left)),
+														_List_fromArray(
+														[
+															A2(option, true, current)
+														]),
+														A2(
+														elm$core$List$map,
+														option(false),
+														right)
+													])))),
+										A2(author$project$Debug$Control$view_, updateChild, current.b)
+									]));
+						}());
+				}
 			});
 	});
 var author$project$Debug$Control$choice = function (choices) {
@@ -5602,47 +5601,51 @@ var author$project$Debug$Control$list_ = F4(
 								_List_fromArray(
 									[1, 0, 3]))));
 				},
-				currentValue: makeList(current),
-				view: author$project$Debug$Control$SingleView(
-					function (_n1) {
-						var selectNew = function (_new) {
-							return A4(author$project$Debug$Control$list_, itemControl, _new, min, max);
-						};
-						return A2(
-							elm$html$Html$map,
-							A2(
-								elm$core$Basics$composeR,
-								elm$core$String$toInt,
+				currentValue: function (_n1) {
+					return makeList(current);
+				},
+				view: function (_n2) {
+					return author$project$Debug$Control$SingleView(
+						function () {
+							var selectNew = function (_new) {
+								return A4(author$project$Debug$Control$list_, itemControl, _new, min, max);
+							};
+							return A2(
+								elm$html$Html$map,
 								A2(
 									elm$core$Basics$composeR,
-									elm$core$Maybe$withDefault(current),
-									selectNew)),
-							A2(
-								elm$html$Html$label,
-								_List_Nil,
-								_List_fromArray(
-									[
-										elm$html$Html$text(''),
-										A2(
-										elm$html$Html$input,
-										_List_fromArray(
-											[
-												elm$html$Html$Attributes$type_('range'),
-												elm$html$Html$Attributes$min(
-												elm$core$String$fromInt(min)),
-												elm$html$Html$Attributes$max(
-												elm$core$String$fromInt(max)),
-												elm$html$Html$Attributes$step(
-												elm$core$String$fromInt(1)),
-												A2(
-												elm$html$Html$Attributes$attribute,
-												'value',
-												elm$core$String$fromInt(current)),
-												A2(elm$html$Html$Events$on, 'input', elm$html$Html$Events$targetValue)
-											]),
-										_List_Nil)
-									])));
-					})
+									elm$core$String$toInt,
+									A2(
+										elm$core$Basics$composeR,
+										elm$core$Maybe$withDefault(current),
+										selectNew)),
+								A2(
+									elm$html$Html$label,
+									_List_Nil,
+									_List_fromArray(
+										[
+											elm$html$Html$text(''),
+											A2(
+											elm$html$Html$input,
+											_List_fromArray(
+												[
+													elm$html$Html$Attributes$type_('range'),
+													elm$html$Html$Attributes$min(
+													elm$core$String$fromInt(min)),
+													elm$html$Html$Attributes$max(
+													elm$core$String$fromInt(max)),
+													elm$html$Html$Attributes$step(
+													elm$core$String$fromInt(1)),
+													A2(
+													elm$html$Html$Attributes$attribute,
+													'value',
+													elm$core$String$fromInt(current)),
+													A2(elm$html$Html$Events$on, 'input', elm$html$Html$Events$targetValue)
+												]),
+											_List_Nil)
+										])));
+						}());
+				}
 			});
 	});
 var author$project$Debug$Control$list = function (itemControl) {
@@ -5652,6 +5655,15 @@ var author$project$Debug$Control$FieldViews = function (a) {
 	return {$: 'FieldViews', a: a};
 };
 var author$project$Debug$Control$NoView = {$: 'NoView'};
+var author$project$Debug$Control$mapAllValues = F2(
+	function (fn, allValues_) {
+		return function (_n0) {
+			return A2(
+				elm$core$List$map,
+				fn,
+				allValues_(_Utils_Tuple0));
+		};
+	});
 var elm$core$Tuple$mapSecond = F2(
 	function (func, _n0) {
 		var x = _n0.a;
@@ -5661,56 +5673,45 @@ var elm$core$Tuple$mapSecond = F2(
 			func(y));
 	});
 var author$project$Debug$Control$map = F2(
-	function (fn, _n0) {
-		var a = _n0.a;
-		var mapTuple = function (_n5) {
-			var label = _n5.a;
-			var control = _n5.b;
-			return _Utils_Tuple2(
-				label,
-				A2(author$project$Debug$Control$map, fn, control));
-		};
+	function (fn, _n1) {
+		var a = _n1.a;
 		return author$project$Debug$Control$Control(
 			{
-				allValues: function (_n1) {
-					return A2(
-						elm$core$List$map,
-						fn,
-						a.allValues(_Utils_Tuple0));
+				allValues: A2(author$project$Debug$Control$mapAllValues, fn, a.allValues),
+				currentValue: function (_n2) {
+					return fn(
+						a.currentValue(_Utils_Tuple0));
 				},
-				currentValue: fn(a.currentValue),
-				view: function () {
-					var _n2 = a.view;
-					switch (_n2.$) {
-						case 'NoView':
-							return author$project$Debug$Control$NoView;
-						case 'SingleView':
-							var v = _n2.a;
-							return author$project$Debug$Control$SingleView(
-								function (_n3) {
-									return A2(
-										elm$html$Html$map,
-										author$project$Debug$Control$map(fn),
-										v(_Utils_Tuple0));
-								});
-						default:
-							var fs = _n2.a;
-							return author$project$Debug$Control$FieldViews(
-								A2(
-									elm$core$List$map,
-									elm$core$Tuple$mapSecond(
-										function (v) {
-											return function (_n4) {
-												return A2(
-													elm$html$Html$map,
-													author$project$Debug$Control$map(fn),
-													v(_Utils_Tuple0));
-											};
-										}),
-									fs));
-					}
-				}()
+				view: function (_n3) {
+					return A2(
+						author$project$Debug$Control$mapView,
+						fn,
+						a.view(_Utils_Tuple0));
+				}
 			});
+	});
+var author$project$Debug$Control$mapView = F2(
+	function (fn, controlView) {
+		switch (controlView.$) {
+			case 'NoView':
+				return author$project$Debug$Control$NoView;
+			case 'SingleView':
+				var v = controlView.a;
+				return author$project$Debug$Control$SingleView(
+					A2(
+						elm$html$Html$map,
+						author$project$Debug$Control$map(fn),
+						v));
+			default:
+				var fs = controlView.a;
+				return author$project$Debug$Control$FieldViews(
+					A2(
+						elm$core$List$map,
+						elm$core$Tuple$mapSecond(
+							elm$html$Html$map(
+								author$project$Debug$Control$map(fn))),
+						fs));
+		}
 	});
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$html$Html$Events$alwaysStop = function (x) {
@@ -5742,18 +5743,20 @@ var author$project$Debug$Control$string = function (initialValue) {
 				return _List_fromArray(
 					[initialValue, '', 'short', 'Longwordyesverylongwithnospacessupercalifragilisticexpialidocious', 'Long text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.']);
 			},
-			currentValue: initialValue,
-			view: author$project$Debug$Control$SingleView(
-				function (_n1) {
-					return A2(
+			currentValue: function (_n1) {
+				return initialValue;
+			},
+			view: function (_n2) {
+				return author$project$Debug$Control$SingleView(
+					A2(
 						elm$html$Html$input,
 						_List_fromArray(
 							[
 								elm$html$Html$Attributes$value(initialValue),
 								elm$html$Html$Events$onInput(author$project$Debug$Control$string)
 							]),
-						_List_Nil);
-				})
+						_List_Nil));
+			}
 		});
 };
 var author$project$Debug$Control$value = function (initial) {
@@ -5763,8 +5766,12 @@ var author$project$Debug$Control$value = function (initial) {
 				return _List_fromArray(
 					[initial]);
 			},
-			currentValue: initial,
-			view: author$project$Debug$Control$NoView
+			currentValue: function (_n1) {
+				return initial;
+			},
+			view: function (_n2) {
+				return author$project$Debug$Control$NoView;
+			}
 		});
 };
 var author$project$Debug$Control$values = F2(
@@ -5836,10 +5843,12 @@ var author$project$Debug$Control$bool = function (initialValue) {
 				return _List_fromArray(
 					[initialValue, !initialValue]);
 			},
-			currentValue: initialValue,
-			view: author$project$Debug$Control$SingleView(
-				function (_n1) {
-					return A2(
+			currentValue: function (_n1) {
+				return initialValue;
+			},
+			view: function (_n2) {
+				return author$project$Debug$Control$SingleView(
+					A2(
 						elm$html$Html$span,
 						_List_Nil,
 						_List_fromArray(
@@ -5861,8 +5870,8 @@ var author$project$Debug$Control$bool = function (initialValue) {
 									return elm$html$Html$text('False');
 								}
 							}()
-							]));
-				})
+							])));
+			}
 		});
 };
 var NoRedInk$datetimepicker_legacy$DateTimePicker$Internal$InternalState = function (a) {
@@ -13064,10 +13073,12 @@ var author$project$Debug$Control$date_ = F2(
 					return _List_fromArray(
 						[initialValue]);
 				},
-				currentValue: initialValue,
-				view: author$project$Debug$Control$SingleView(
-					function (_n1) {
-						return A2(
+				currentValue: function (_n1) {
+					return initialValue;
+				},
+				view: function (_n2) {
+					return author$project$Debug$Control$SingleView(
+						A2(
 							elm$html$Html$span,
 							_List_fromArray(
 								[
@@ -13090,8 +13101,8 @@ var author$project$Debug$Control$date_ = F2(
 										_List_Nil,
 										state,
 										elm$core$Maybe$Just(initialValue)))
-								]));
-					})
+								])));
+				}
 			});
 	});
 var elm$time$Time$flooredDiv = F2(
@@ -13439,49 +13450,50 @@ var author$project$Debug$Control$field = F3(
 						},
 						control.allValues(_Utils_Tuple0));
 				},
-				currentValue: pipeline.currentValue(control.currentValue),
-				view: function () {
+				currentValue: function (_n3) {
+					return A2(
+						pipeline.currentValue,
+						_Utils_Tuple0,
+						control.currentValue(_Utils_Tuple0));
+				},
+				view: function (_n4) {
 					var otherFields = function () {
-						var _n4 = pipeline.view;
-						if (_n4.$ === 'FieldViews') {
-							var fs = _n4.a;
+						var _n5 = pipeline.view(_Utils_Tuple0);
+						if (_n5.$ === 'FieldViews') {
+							var fs = _n5.a;
 							return A2(
 								elm$core$List$map,
 								elm$core$Tuple$mapSecond(
 									function (x) {
-										return function (_n5) {
-											return A2(
-												elm$html$Html$map,
-												A2(
-													author$project$Debug$Control$field,
-													name,
-													author$project$Debug$Control$Control(control)),
-												x(_Utils_Tuple0));
-										};
+										return A2(
+											elm$html$Html$map,
+											A2(
+												author$project$Debug$Control$field,
+												name,
+												author$project$Debug$Control$Control(control)),
+											x);
 									}),
 								fs);
 						} else {
 							return _List_Nil;
 						}
 					}();
-					var newView = function (_n3) {
-						return A2(
-							author$project$Debug$Control$view_,
-							function (v) {
-								return A3(
-									author$project$Debug$Control$field,
-									name,
-									v,
-									author$project$Debug$Control$Control(pipeline));
-							},
-							author$project$Debug$Control$Control(control));
-					};
+					var newView = A2(
+						author$project$Debug$Control$view_,
+						function (v) {
+							return A3(
+								author$project$Debug$Control$field,
+								name,
+								v,
+								author$project$Debug$Control$Control(pipeline));
+						},
+						author$project$Debug$Control$Control(control));
 					return author$project$Debug$Control$FieldViews(
 						A2(
 							elm$core$List$cons,
 							_Utils_Tuple2(name, newView),
 							otherFields));
-				}()
+				}
 			});
 	});
 var author$project$Debug$Control$maybe = F2(
@@ -13498,10 +13510,13 @@ var author$project$Debug$Control$maybe = F2(
 							elm$core$Maybe$Just,
 							control.allValues(_Utils_Tuple0)));
 				},
-				currentValue: isJust ? elm$core$Maybe$Just(control.currentValue) : elm$core$Maybe$Nothing,
-				view: author$project$Debug$Control$SingleView(
-					function (_n2) {
-						return A2(
+				currentValue: function (_n2) {
+					return isJust ? elm$core$Maybe$Just(
+						control.currentValue(_Utils_Tuple0)) : elm$core$Maybe$Nothing;
+				},
+				view: function (_n3) {
+					return author$project$Debug$Control$SingleView(
+						A2(
 							elm$html$Html$span,
 							_List_fromArray(
 								[
@@ -13529,8 +13544,8 @@ var author$project$Debug$Control$maybe = F2(
 									author$project$Debug$Control$view_,
 									author$project$Debug$Control$maybe(isJust),
 									author$project$Debug$Control$Control(control)) : elm$html$Html$text('Nothing')
-								]));
-					})
+								])));
+				}
 			});
 	});
 var author$project$Debug$Control$record = function (fn) {
@@ -13540,8 +13555,12 @@ var author$project$Debug$Control$record = function (fn) {
 				return _List_fromArray(
 					[fn]);
 			},
-			currentValue: fn,
-			view: author$project$Debug$Control$FieldViews(_List_Nil)
+			currentValue: function (_n1) {
+				return fn;
+			},
+			view: function (_n2) {
+				return author$project$Debug$Control$FieldViews(_List_Nil);
+			}
 		});
 };
 var author$project$DropboxExample$Add = {$: 'Add'};
@@ -13626,7 +13645,59 @@ var author$project$Main$choiceControl = author$project$Debug$Control$choice(
 			author$project$Debug$Control$value(false))
 		]));
 var author$project$Main$stringControl = author$project$Debug$Control$string('default value');
-var author$project$Main$initialModel = {animal: author$project$AnimalExample$debugControl, choice: author$project$Main$choiceControl, dropbox: author$project$DropboxExample$init, string: author$project$Main$stringControl, which: author$project$Main$Dropbox};
+var author$project$Debug$Control$lazy = function (fn) {
+	var unwrap = function (_n3) {
+		var v = _n3.a;
+		return v;
+	};
+	return author$project$Debug$Control$Control(
+		{
+			allValues: function (_n0) {
+				return unwrap(
+					fn(_Utils_Tuple0)).allValues(_Utils_Tuple0);
+			},
+			currentValue: function (_n1) {
+				return unwrap(
+					fn(_Utils_Tuple0)).currentValue(_Utils_Tuple0);
+			},
+			view: function (_n2) {
+				return unwrap(
+					fn(_Utils_Tuple0)).view(_Utils_Tuple0);
+			}
+		});
+};
+var author$project$RecursionExample$RecursiveType = function (a) {
+	return {$: 'RecursiveType', a: a};
+};
+function author$project$RecursionExample$cyclic$init() {
+	return A2(
+		author$project$Debug$Control$map,
+		author$project$RecursionExample$RecursiveType,
+		author$project$Debug$Control$choice(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'No child',
+					author$project$Debug$Control$value(elm$core$Maybe$Nothing)),
+					_Utils_Tuple2(
+					'child',
+					A2(
+						author$project$Debug$Control$map,
+						elm$core$Maybe$Just,
+						author$project$Debug$Control$lazy(
+							function (_n0) {
+								return author$project$RecursionExample$cyclic$init();
+							})))
+				])));
+}
+try {
+	var author$project$RecursionExample$init = author$project$RecursionExample$cyclic$init();
+	author$project$RecursionExample$cyclic$init = function () {
+		return author$project$RecursionExample$init;
+	};
+} catch ($) {
+throw 'Some top-level definitions from `RecursionExample` are causing infinite recursion:\n\n  ┌─────┐\n  │    init\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.0/halting-problem to learn how to fix it!';}
+var author$project$Main$initialModel = {animal: author$project$AnimalExample$debugControl, choice: author$project$Main$choiceControl, dropbox: author$project$DropboxExample$init, recursionExample: author$project$RecursionExample$init, string: author$project$Main$stringControl, which: author$project$Main$Dropbox};
 var author$project$DropboxExample$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'DownloadChange') {
@@ -13666,11 +13737,16 @@ var author$project$Main$update = F2(
 				return _Utils_update(
 					model,
 					{choice: choice});
-			default:
+			case 'ChangeString':
 				var string = msg.a;
 				return _Utils_update(
 					model,
 					{string: string});
+			default:
+				var choice = msg.a;
+				return _Utils_update(
+					model,
+					{recursionExample: choice});
 		}
 	});
 var elm$core$String$left = F2(
@@ -13803,40 +13879,6 @@ var author$project$AnimalExample$viewAnimal = F2(
 var author$project$Debug$Control$view = F2(
 	function (msg, _n0) {
 		var c = _n0.a;
-		var fieldRow = function (_n1) {
-			var name = _n1.a;
-			var fieldView = _n1.b;
-			return A2(
-				elm$html$Html$tr,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						elm$html$Html$td,
-						_List_fromArray(
-							[
-								A2(elm$html$Html$Attributes$style, 'text-align', 'right')
-							]),
-						_List_fromArray(
-							[
-								elm$html$Html$text(name)
-							])),
-						A2(
-						elm$html$Html$td,
-						_List_Nil,
-						_List_fromArray(
-							[
-								elm$html$Html$text(' = ')
-							])),
-						A2(
-						elm$html$Html$td,
-						_List_Nil,
-						_List_fromArray(
-							[
-								fieldView(_Utils_Tuple0)
-							]))
-					]));
-		};
 		return A2(
 			elm$html$Html$div,
 			_List_Nil,
@@ -14055,15 +14097,38 @@ var author$project$Main$ChangeAnimal = function (a) {
 var author$project$Main$ChangeChoice = function (a) {
 	return {$: 'ChangeChoice', a: a};
 };
+var author$project$Main$ChangeRecursiveChoice = function (a) {
+	return {$: 'ChangeRecursiveChoice', a: a};
+};
 var author$project$Main$ChangeString = function (a) {
 	return {$: 'ChangeString', a: a};
 };
 var author$project$Main$DropboxMsg = function (a) {
 	return {$: 'DropboxMsg', a: a};
 };
+var author$project$Main$RecursionExample = {$: 'RecursionExample'};
 var author$project$Main$SimpleControls = {$: 'SimpleControls'};
 var author$project$Main$SwitchTo = function (a) {
 	return {$: 'SwitchTo', a: a};
+};
+var author$project$RecursionExample$view = function (control) {
+	var h = function (title) {
+		return A2(
+			elm$html$Html$h2,
+			_List_Nil,
+			_List_fromArray(
+				[
+					elm$html$Html$text(title)
+				]));
+	};
+	return A2(
+		elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				h('Recursively-defined values'),
+				A2(author$project$Debug$Control$view, elm$core$Basics$identity, control)
+			]));
 };
 var elm$html$Html$br = _VirtualDom_node('br');
 var elm$html$Html$button = _VirtualDom_node('button');
@@ -14116,6 +14181,18 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$text('Simple controls')
 					])),
 				A2(elm$html$Html$br, _List_Nil, _List_Nil),
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Events$onClick(
+						author$project$Main$SwitchTo(author$project$Main$RecursionExample))
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Recursion example')
+					])),
+				A2(elm$html$Html$br, _List_Nil, _List_Nil),
 				function () {
 				var _n0 = model.which;
 				switch (_n0.$) {
@@ -14129,7 +14206,7 @@ var author$project$Main$view = function (model) {
 							elm$html$Html$map,
 							author$project$Main$DropboxMsg,
 							author$project$DropboxExample$view(model.dropbox));
-					default:
+					case 'SimpleControls':
 						return A2(
 							elm$html$Html$div,
 							_List_Nil,
@@ -14152,6 +14229,11 @@ var author$project$Main$view = function (model) {
 										])),
 									A2(author$project$Debug$Control$view, author$project$Main$ChangeString, model.string)
 								]));
+					default:
+						return A2(
+							elm$html$Html$map,
+							author$project$Main$ChangeRecursiveChoice,
+							author$project$RecursionExample$view(model.recursionExample));
 				}
 			}()
 			]));
