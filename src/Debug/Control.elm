@@ -5,6 +5,7 @@ module Debug.Control exposing
     , values, maybe, choice, list, record, field
     , map
     , view, currentValue, allValues
+    , lazy
     )
 
 {-| Create interactive controls for complex data structures.
@@ -16,6 +17,7 @@ module Debug.Control exposing
 @docs map
 
 @docs view, currentValue, allValues
+@docs lazy
 
 -}
 
@@ -35,16 +37,16 @@ import Time.Extra
 -}
 type Control a
     = Control
-        { currentValue : a
+        { currentValue : () -> a
         , allValues : () -> List a
-        , view : ControlView a
+        , view : () -> ControlView a
         }
 
 
 type ControlView a
     = NoView
-    | SingleView (() -> Html (Control a))
-    | FieldViews (List ( String, () -> Html (Control a) ))
+    | SingleView (Html (Control a))
+    | FieldViews (List ( String, Html (Control a) ))
 
 
 {-| A `Control` that has a static value (and no UI).
@@ -52,9 +54,9 @@ type ControlView a
 value : a -> Control a
 value initial =
     Control
-        { currentValue = initial
+        { currentValue = \() -> initial
         , allValues = \() -> [ initial ]
-        , view = NoView
+        , view = \() -> NoView
         }
 
 
@@ -78,18 +80,19 @@ maybe : Bool -> Control a -> Control (Maybe a)
 maybe isJust (Control control) =
     Control
         { currentValue =
-            if isJust then
-                Just control.currentValue
+            \() ->
+                if isJust then
+                    Just (control.currentValue ())
 
-            else
-                Nothing
+                else
+                    Nothing
         , allValues =
             \() ->
                 Nothing
                     :: List.map Just (control.allValues ())
         , view =
-            SingleView <|
-                \() ->
+            \() ->
+                SingleView <|
                     Html.span
                         [ Html.Attributes.style "white-space" "nowrap"
                         ]
@@ -114,15 +117,15 @@ maybe isJust (Control control) =
 bool : Bool -> Control Bool
 bool initialValue =
     Control
-        { currentValue = initialValue
+        { currentValue = \() -> initialValue
         , allValues =
             \() ->
                 [ initialValue
                 , not initialValue
                 ]
         , view =
-            SingleView <|
-                \() ->
+            \() ->
+                SingleView <|
                     Html.span []
                         [ Html.input
                             [ Html.Attributes.type_ "checkbox"
@@ -146,7 +149,7 @@ bool initialValue =
 string : String -> Control String
 string initialValue =
     Control
-        { currentValue = initialValue
+        { currentValue = \() -> initialValue
         , allValues =
             \() ->
                 [ initialValue
@@ -156,8 +159,8 @@ string initialValue =
                 , "Long text lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
                 ]
         , view =
-            SingleView <|
-                \() ->
+            \() ->
+                SingleView <|
                     Html.input
                         [ Html.Attributes.value initialValue
                         , Html.Events.onInput string
@@ -198,11 +201,11 @@ date zone initialValue =
 date_ : DateTimePicker.State -> DateTimePicker.DateTime -> Control DateTimePicker.DateTime
 date_ state initialValue =
     Control
-        { currentValue = initialValue
+        { currentValue = \() -> initialValue
         , allValues = \() -> [ initialValue ] -- TODO
         , view =
-            SingleView <|
-                \() ->
+            \() ->
+                SingleView <|
                     Html.span
                         [ Html.Attributes.style "display" "inline-block"
                         ]
@@ -248,15 +251,15 @@ choice_ :
     -> Control a
 choice_ left current right =
     Control
-        { currentValue = current |> Tuple.second |> currentValue
+        { currentValue = \() -> current |> Tuple.second |> currentValue
         , allValues =
             \() ->
                 (List.reverse left ++ [ current ] ++ right)
                     |> List.map (Tuple.second >> allValues)
                     |> List.concat
         , view =
-            SingleView <|
-                \() ->
+            \() ->
+                SingleView <|
                     let
                         option selected ( label, _ ) =
                             Html.option
@@ -323,7 +326,7 @@ list_ itemControl current min max =
                 |> List.take n
     in
     Control
-        { currentValue = makeList current
+        { currentValue = \() -> makeList current
         , allValues =
             \() ->
                 [ 1, 0, 3 ]
@@ -331,8 +334,8 @@ list_ itemControl current min max =
                     |> (\a -> List.append a [ min, max ])
                     |> List.map makeList
         , view =
-            SingleView <|
-                \() ->
+            \() ->
+                SingleView <|
                     let
                         selectNew new =
                             list_ itemControl new min max
@@ -381,9 +384,9 @@ You will use this with `field`.
 record : a -> Control a
 record fn =
     Control
-        { currentValue = fn
+        { currentValue = \() -> fn
         , allValues = \() -> [ fn ]
-        , view = FieldViews []
+        , view = \() -> FieldViews []
         }
 
 
@@ -395,7 +398,7 @@ See [`record`](#record).
 field : String -> Control a -> Control (a -> b) -> Control b
 field name (Control control) (Control pipeline) =
     Control
-        { currentValue = pipeline.currentValue control.currentValue
+        { currentValue = \() -> pipeline.currentValue () (control.currentValue ())
         , allValues =
             \() ->
                 control.allValues ()
@@ -405,20 +408,21 @@ field name (Control control) (Control pipeline) =
                                 (pipeline.allValues ())
                         )
         , view =
-            let
-                otherFields =
-                    case pipeline.view of
-                        FieldViews fs ->
-                            List.map (Tuple.mapSecond (\x -> \() -> Html.map (field name (Control control)) (x ())))
-                                fs
+            \() ->
+                let
+                    otherFields =
+                        case pipeline.view () of
+                            FieldViews fs ->
+                                List.map (Tuple.mapSecond (\x -> Html.map (field name (Control control)) x))
+                                    fs
 
-                        _ ->
-                            []
+                            _ ->
+                                []
 
-                newView () =
-                    view_ (\v -> field name v (Control pipeline)) (Control control)
-            in
-            FieldViews (( name, newView ) :: otherFields)
+                    newView =
+                        view_ (\v -> field name v (Control pipeline)) (Control control)
+                in
+                FieldViews (( name, newView ) :: otherFields)
         }
 
 
@@ -426,33 +430,66 @@ field name (Control control) (Control pipeline) =
 -}
 map : (a -> b) -> Control a -> Control b
 map fn (Control a) =
+    Control
+        { currentValue = \() -> fn (a.currentValue ())
+        , allValues = mapAllValues fn a.allValues
+        , view = \() -> mapView fn (a.view ())
+        }
+
+
+{-| Use lazy when working with recursive types:
+
+    import Debug.Control as Control exposing (Control)
+
+    type RecursiveType
+        = RecursiveType (Maybe RecursiveType)
+
+    recursiveTypeControl : Control RecursiveType
+    recursiveTypeControl =
+        Control.choice
+            [ ( "No child", Control.value Nothing )
+            , ( "child", Control.lazy (\() -> recursiveTypeControl) |> Control.map Just )
+            ]
+            |> Control.map RecursiveType
+
+-}
+lazy : (() -> Control a) -> Control a
+lazy fn =
     let
-        mapTuple ( label, control ) =
-            ( label, map fn control )
+        unwrap (Control v) =
+            v
     in
     Control
-        { currentValue = fn a.currentValue
-        , allValues = \() -> List.map fn (a.allValues ())
-        , view =
-            case a.view of
-                NoView ->
-                    NoView
-
-                SingleView v ->
-                    SingleView <|
-                        \() -> Html.map (map fn) (v ())
-
-                FieldViews fs ->
-                    FieldViews <|
-                        List.map (Tuple.mapSecond (\v -> \() -> Html.map (map fn) (v ()))) fs
+        { currentValue = \() -> (unwrap (fn ())).currentValue ()
+        , allValues = \() -> (unwrap (fn ())).allValues ()
+        , view = \() -> (unwrap (fn ())).view ()
         }
+
+
+mapAllValues : (a -> b) -> (() -> List a) -> (() -> List b)
+mapAllValues fn allValues_ =
+    \() -> List.map fn (allValues_ ())
+
+
+mapView : (a -> b) -> ControlView a -> ControlView b
+mapView fn controlView =
+    case controlView of
+        NoView ->
+            NoView
+
+        SingleView v ->
+            SingleView (Html.map (map fn) v)
+
+        FieldViews fs ->
+            FieldViews
+                (List.map (Tuple.mapSecond (Html.map (map fn))) fs)
 
 
 {-| Gets the current value of a `Control`.
 -}
 currentValue : Control a -> a
 currentValue (Control c) =
-    c.currentValue
+    c.currentValue ()
 
 
 {-| TODO: revise API
@@ -466,16 +503,6 @@ allValues (Control c) =
 -}
 view : (Control a -> msg) -> Control a -> Html msg
 view msg (Control c) =
-    let
-        fieldRow ( name, fieldView ) =
-            Html.tr []
-                [ Html.td
-                    [ Html.Attributes.style "text-align" "right" ]
-                    [ Html.text name ]
-                , Html.td [] [ Html.text " = " ]
-                , Html.td [] [ fieldView () ]
-                ]
-    in
     Html.div []
         [ view_ msg (Control c)
         ]
@@ -483,28 +510,28 @@ view msg (Control c) =
 
 view_ : (Control a -> msg) -> Control a -> Html msg
 view_ msg (Control c) =
-    let
-        fieldRow ( name, fieldView ) =
-            Html.tr
-                [ Html.Attributes.style "vertical-align" "text-top"
-                ]
-                [ Html.td [] [ Html.text "," ]
-                , Html.td
-                    [ Html.Attributes.style "text-align" "right"
-                    ]
-                    [ Html.text name ]
-                , Html.td [] [ Html.text " = " ]
-                , Html.td [] [ fieldView () ]
-                ]
-    in
-    case c.view of
+    case c.view () of
         NoView ->
             Html.text ""
 
         SingleView v ->
-            Html.map msg <| v ()
+            Html.map msg v
 
         FieldViews fs ->
+            let
+                fieldRow ( name, fieldView ) =
+                    Html.tr
+                        [ Html.Attributes.style "vertical-align" "text-top"
+                        ]
+                        [ Html.td [] [ Html.text "," ]
+                        , Html.td
+                            [ Html.Attributes.style "text-align" "right"
+                            ]
+                            [ Html.text name ]
+                        , Html.td [] [ Html.text " = " ]
+                        , Html.td [] [ fieldView ]
+                        ]
+            in
             List.concat
                 [ [ Html.tr
                         [ Html.Attributes.style "vertical-align" "text-top"
