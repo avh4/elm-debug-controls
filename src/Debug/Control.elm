@@ -1,7 +1,7 @@
 module Debug.Control exposing
     ( Control
     , value
-    , bool, string, longString, date
+    , bool, string, stringTextarea, date
     , values, maybe, choice, list, record, field
     , map
     , view, currentValue, allValues
@@ -12,7 +12,7 @@ module Debug.Control exposing
 
 @docs Control
 @docs value
-@docs bool, string, longString, date
+@docs bool, string, stringTextarea, date
 @docs values, maybe, choice, list, record, field
 @docs map
 
@@ -171,8 +171,8 @@ string initialValue =
 
 {-| A `Control` that allows multiline text input.
 -}
-longString : String -> Control String
-longString initialValue =
+stringTextarea : String -> Control String
+stringTextarea initialValue =
     Control
         { currentValue = \() -> initialValue
         , allValues =
@@ -196,7 +196,7 @@ longString initialValue =
                 SingleView <|
                     Html.textarea
                         [ Html.Attributes.value initialValue
-                        , Html.Events.onInput longString
+                        , Html.Events.onInput stringTextarea
                         ]
                         []
         }

@@ -25,15 +25,15 @@ all =
                         |> Query.fromHtml
                         |> Query.has [ tag "input", attribute (Html.value "default") ]
             ]
-        , describe "Control.longString"
+        , describe "Control.stringTextarea"
             [ test "initial value" <|
                 \() ->
-                    Control.longString "long default"
+                    Control.stringTextarea "long default"
                         |> Control.currentValue
                         |> Expect.equal "long default"
             , test "Renders all options" <|
                 \() ->
-                    Control.longString "long default"
+                    Control.stringTextarea "long default"
                         |> Control.view identity
                         |> Query.fromHtml
                         |> Query.has [ tag "textarea", attribute (Html.value "long default") ]

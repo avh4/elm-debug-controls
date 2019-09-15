@@ -52,7 +52,7 @@ init =
                 (Control.maybe False <| Control.date Time.utc <| Time.millisToPosix 0)
             |> Control.field "mute" (Control.bool False)
             |> Control.field "content"
-                (Control.longString
+                (Control.stringTextarea
                     """I do much wonder that one man, seeing how much
 another man is a fool when he dedicates his
 behaviors to love, will, after he hath laughed at
@@ -142,7 +142,7 @@ record UploadRequest
         (maybe False <| date Tim.utc <| Time.millisToPosix 0)
     |> field "mute" (bool False)
     |> field "content"
-        (Control.longString
+        (Control.stringTextarea
             \"\"\"I do much wonder that one man, seeing how much
 another man is a fool when he dedicates his
 behaviors to love, will, after he hath laughed at
