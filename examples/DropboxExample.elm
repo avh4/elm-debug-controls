@@ -51,7 +51,21 @@ init =
             |> Control.field "clientModified"
                 (Control.maybe False <| Control.date Time.utc <| Time.millisToPosix 0)
             |> Control.field "mute" (Control.bool False)
-            |> Control.field "content" (Control.string "HELLO.")
+            |> Control.field "content"
+                (Control.stringTextarea
+                    """I do much wonder that one man, seeing how much
+another man is a fool when he dedicates his
+behaviors to love, will, after he hath laughed at
+such shallow follies in others, become the argument
+of his own scorn by failing in love: and such a man
+is Claudio. I have known when there was no music
+with him but the drum and the fife; and now had he
+rather hear the tabour and the pipe: I have known
+when he would have walked ten mile a-foot to see a
+good armour; and now will he lie ten nights awake,
+carving the fashion of a new doublet.
+"""
+                )
     }
 
 
@@ -127,6 +141,21 @@ record UploadRequest
     |> field "clientModified"
         (maybe False <| date Tim.utc <| Time.millisToPosix 0)
     |> field "mute" (bool False)
-    |> field "content" (string "HELLO.")""" ]
+    |> field "content"
+        (Control.stringTextarea
+            \"\"\"I do much wonder that one man, seeing how much
+another man is a fool when he dedicates his
+behaviors to love, will, after he hath laughed at
+such shallow follies in others, become the argument
+of his own scorn by failing in love: and such a man
+is Claudio. I have known when there was no music
+with him but the drum and the fife; and now had he
+rather hear the tabour and the pipe: I have known
+when he would have walked ten mile a-foot to see a
+good armour; and now will he lie ten nights awake,
+carving the fashion of a new doublet.
+\"\"\"
+        )
+                """ ]
         , Control.view UploadChange model.upload
         ]

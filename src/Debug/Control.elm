@@ -1,7 +1,7 @@
 module Debug.Control exposing
     ( Control
     , value
-    , bool, string, date
+    , bool, string, stringTextarea, date
     , values, maybe, choice, list, record, field
     , map
     , view, currentValue, allValues
@@ -12,7 +12,7 @@ module Debug.Control exposing
 
 @docs Control
 @docs value
-@docs bool, string, date
+@docs bool, string, stringTextarea, date
 @docs values, maybe, choice, list, record, field
 @docs map
 
@@ -164,6 +164,39 @@ string initialValue =
                     Html.input
                         [ Html.Attributes.value initialValue
                         , Html.Events.onInput string
+                        ]
+                        []
+        }
+
+
+{-| A `Control` that allows multiline text input.
+-}
+stringTextarea : String -> Control String
+stringTextarea initialValue =
+    Control
+        { currentValue = \() -> initialValue
+        , allValues =
+            \() ->
+                [ initialValue
+                , ""
+                , "short"
+                , "Longwordyesverylongwithnospacessupercalifragilisticexpialidocious"
+                , """
+                    Long text lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                    nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+                    reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                  """
+                ]
+        , view =
+            \() ->
+                SingleView <|
+                    Html.textarea
+                        [ Html.Attributes.value initialValue
+                        , Html.Events.onInput stringTextarea
                         ]
                         []
         }
