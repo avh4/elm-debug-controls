@@ -13563,6 +13563,30 @@ var author$project$Debug$Control$record = function (fn) {
 			}
 		});
 };
+var elm$html$Html$textarea = _VirtualDom_node('textarea');
+var author$project$Debug$Control$stringTextarea = function (initialValue) {
+	return author$project$Debug$Control$Control(
+		{
+			allValues: function (_n0) {
+				return _List_fromArray(
+					[initialValue, '', 'short', 'Longwordyesverylongwithnospacessupercalifragilisticexpialidocious', '\n                    Long text lorem ipsum dolor sit amet, consectetur adipiscing elit,\n                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\n                    nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in\n                    reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n                  ']);
+			},
+			currentValue: function (_n1) {
+				return initialValue;
+			},
+			view: function (_n2) {
+				return author$project$Debug$Control$SingleView(
+					A2(
+						elm$html$Html$textarea,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$value(initialValue),
+								elm$html$Html$Events$onInput(author$project$Debug$Control$stringTextarea)
+							]),
+						_List_Nil));
+			}
+		});
+};
 var author$project$DropboxExample$Add = {$: 'Add'};
 var author$project$DropboxExample$DownloadRequest = function (path) {
 	return {path: path};
@@ -13589,7 +13613,7 @@ var author$project$DropboxExample$init = {
 	upload: A3(
 		author$project$Debug$Control$field,
 		'content',
-		author$project$Debug$Control$string('HELLO.'),
+		author$project$Debug$Control$stringTextarea('I do much wonder that one man, seeing how much\nanother man is a fool when he dedicates his\nbehaviors to love, will, after he hath laughed at\nsuch shallow follies in others, become the argument\nof his own scorn by failing in love: and such a man\nis Claudio. I have known when there was no music\nwith him but the drum and the fife; and now had he\nrather hear the tabour and the pipe: I have known\nwhen he would have walked ten mile a-foot to see a\ngood armour; and now will he lie ten nights awake,\ncarving the fashion of a new doublet.\n'),
 		A3(
 			author$project$Debug$Control$field,
 			'mute',
@@ -14085,7 +14109,7 @@ var author$project$DropboxExample$view = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text('import Debug.Control exposing (bool, choice, field, map, record, string, value)\n\nrecord UploadRequest\n    |> field "path" (string "/demo.txt")\n    |> field "mode"\n        (choice\n            [ ( "Add", value Add )\n            , ( "Overwrite", value Overwrite )\n            , ( "Update rev", map Update <| string "123abcdef" )\n            ]\n        )\n    |> field "autorename" (bool False)\n    |> field "clientModified"\n        (maybe False <| date Tim.utc <| Time.millisToPosix 0)\n    |> field "mute" (bool False)\n    |> field "content" (string "HELLO.")')
+						elm$html$Html$text('import Debug.Control exposing (bool, choice, field, map, record, string, value)\n\nrecord UploadRequest\n    |> field "path" (string "/demo.txt")\n    |> field "mode"\n        (choice\n            [ ( "Add", value Add )\n            , ( "Overwrite", value Overwrite )\n            , ( "Update rev", map Update <| string "123abcdef" )\n            ]\n        )\n    |> field "autorename" (bool False)\n    |> field "clientModified"\n        (maybe False <| date Tim.utc <| Time.millisToPosix 0)\n    |> field "mute" (bool False)\n    |> field "content"\n        (Control.stringTextarea\n            \"\"\"I do much wonder that one man, seeing how much\nanother man is a fool when he dedicates his\nbehaviors to love, will, after he hath laughed at\nsuch shallow follies in others, become the argument\nof his own scorn by failing in love: and such a man\nis Claudio. I have known when there was no music\nwith him but the drum and the fife; and now had he\nrather hear the tabour and the pipe: I have known\nwhen he would have walked ten mile a-foot to see a\ngood armour; and now will he lie ten nights awake,\ncarving the fashion of a new doublet.\n\"\"\"\n        )\n                ')
 					])),
 				A2(author$project$Debug$Control$view, author$project$DropboxExample$UploadChange, model.upload)
 			]));
