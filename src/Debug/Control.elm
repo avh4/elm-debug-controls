@@ -557,12 +557,14 @@ view_ msg (Control c) =
                         [ Html.Attributes.style "vertical-align" "text-top"
                         ]
                         [ Html.td [] [ Html.text "," ]
-                        , Html.td
-                            [ Html.Attributes.style "text-align" "right"
+                        , Html.label []
+                            [ Html.td
+                                [ Html.Attributes.style "text-align" "right"
+                                ]
+                                [ Html.text name ]
+                            , Html.td [] [ Html.text " = " ]
+                            , Html.td [] [ fieldView ]
                             ]
-                            [ Html.text name ]
-                        , Html.td [] [ Html.text " = " ]
-                        , Html.td [] [ fieldView ]
                         ]
             in
             List.concat
