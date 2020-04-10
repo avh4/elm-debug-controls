@@ -21,7 +21,6 @@ module Debug.Control exposing
 
 -}
 
-import Css
 import DateTimePicker
 import Html exposing (Html)
 import Html.Attributes
@@ -553,28 +552,54 @@ view_ msg (Control c) =
         FieldViews fs ->
             let
                 fieldRow ( name, fieldView ) =
-                    Html.tr
-                        [ Html.Attributes.style "vertical-align" "text-top"
+                    Html.label
+                        [ Html.Attributes.style "display" "table-row"
+                        , Html.Attributes.style "vertical-align" "text-top"
                         ]
-                        [ Html.td [] [ Html.text "," ]
-                        , Html.td
-                            [ Html.Attributes.style "text-align" "right"
+                        [ Html.span
+                            [ Html.Attributes.style "display" "table-cell"
+                            ]
+                            [ Html.text "," ]
+                        , Html.span
+                            [ Html.Attributes.style "display" "table-cell"
+                            , Html.Attributes.style "text-align" "right"
                             ]
                             [ Html.text name ]
-                        , Html.td [] [ Html.text " = " ]
-                        , Html.td [] [ fieldView ]
+                        , Html.span
+                            [ Html.Attributes.style "display" "table-cell"
+                            ]
+                            [ Html.text " = " ]
+                        , Html.div
+                            [ Html.Attributes.style "display" "table-cell"
+                            ]
+                            [ fieldView ]
                         ]
             in
             List.concat
-                [ [ Html.tr
-                        [ Html.Attributes.style "vertical-align" "text-top"
+                [ [ Html.div
+                        [ Html.Attributes.style "display" "table-row"
+                        , Html.Attributes.style "vertical-align" "text-top"
                         ]
-                        [ Html.td [] [ Html.text "{" ] ]
+                        [ Html.div
+                            [ Html.Attributes.style "display" "table-cell" ]
+                            [ Html.text "{" ]
+                        ]
                   ]
                 , fs
                     |> List.reverse
                     |> List.map fieldRow
-                , [ Html.tr [] [ Html.td [] [ Html.text "}" ] ] ]
+                , [ Html.div
+                        [ Html.Attributes.style "display" "table-row"
+                        ]
+                        [ Html.div
+                            [ Html.Attributes.style "display" "table-cell"
+                            ]
+                            [ Html.text "}" ]
+                        ]
+                  ]
                 ]
-                |> Html.table []
+                |> Html.div
+                    [ Html.Attributes.style "display" "table"
+                    , Html.Attributes.style "border-spacing" "2px"
+                    ]
                 |> Html.map msg
