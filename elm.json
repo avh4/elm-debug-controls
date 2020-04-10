@@ -3,7 +3,7 @@
     "name": "avh4/elm-debug-controls",
     "summary": "Easily create interactive UIs for complex data structures",
     "license": "BSD-3-Clause",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "exposed-modules": [
         "Debug.Control"
     ],
