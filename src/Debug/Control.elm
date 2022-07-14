@@ -551,7 +551,7 @@ view_ msg (Control c) =
 
         FieldViews fs ->
             let
-                fieldRow ( name, fieldView ) =
+                fieldRow index ( name, fieldView ) =
                     Html.label
                         [ Html.Attributes.style "display" "table-row"
                         , Html.Attributes.style "vertical-align" "text-top"
@@ -559,7 +559,14 @@ view_ msg (Control c) =
                         [ Html.span
                             [ Html.Attributes.style "display" "table-cell"
                             ]
-                            [ Html.text "," ]
+                            [ Html.text
+                                (if index == 0 then
+                                    "{"
+
+                                 else
+                                    ","
+                                )
+                            ]
                         , Html.span
                             [ Html.Attributes.style "display" "table-cell"
                             , Html.Attributes.style "text-align" "right"
@@ -576,18 +583,9 @@ view_ msg (Control c) =
                         ]
             in
             List.concat
-                [ [ Html.div
-                        [ Html.Attributes.style "display" "table-row"
-                        , Html.Attributes.style "vertical-align" "text-top"
-                        ]
-                        [ Html.div
-                            [ Html.Attributes.style "display" "table-cell" ]
-                            [ Html.text "{" ]
-                        ]
-                  ]
-                , fs
+                [ fs
                     |> List.reverse
-                    |> List.map fieldRow
+                    |> List.indexedMap fieldRow
                 , [ Html.div
                         [ Html.Attributes.style "display" "table-row"
                         ]
