@@ -219,7 +219,7 @@ date zone initialValue =
                 ++ ":"
                 ++ twoDigit initial.minute
     in
-    date_ initialDateTime
+    dateInputField initialDateTime
         |> map (toPosix zone >> Maybe.withDefault initialValue)
 
 
@@ -351,8 +351,8 @@ twoDigit val =
         String.fromInt val
 
 
-date_ : String -> Control String
-date_ initialValue =
+dateInputField : String -> Control String
+dateInputField initialValue =
     Control
         { currentValue = \() -> initialValue
         , allValues = \() -> [ initialValue ] -- TODO
@@ -363,7 +363,7 @@ date_ initialValue =
                         [ Html.Attributes.type_ "datetime-local"
                         , Html.Attributes.pattern "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
                         , Html.Attributes.attribute "value" initialValue
-                        , Html.Events.onInput date_
+                        , Html.Events.onInput dateInputField
                         ]
                         []
         }
