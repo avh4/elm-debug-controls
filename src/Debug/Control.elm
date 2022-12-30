@@ -21,11 +21,9 @@ module Debug.Control exposing
 
 -}
 
-import DateTimePicker
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
-import Html.Styled
 import Json.Decode
 import String
 import Time
@@ -201,60 +199,173 @@ stringTextarea initialValue =
         }
 
 
-{-| A `Control` that allows a Date (include date and time) input
-with a date picker UI.
+{-| A `Control` that allows a date and time input using the browser's date picker UI.
 -}
 date : Time.Zone -> Time.Posix -> Control Time.Posix
 date zone initialValue =
     let
+        initial =
+            Time.Extra.posixToParts zone initialValue
+
+        initialDateTime : String
         initialDateTime =
-            { year = Time.toYear zone initialValue
-            , month = Time.toMonth zone initialValue
-            , day = Time.toDay zone initialValue
-            , hour = Time.toHour zone initialValue
-            , minute = Time.toMinute zone initialValue
-            }
-
-        toPosix { year, month, day, hour, minute } =
-            Time.Extra.partsToPosix zone
-                { year = year
-                , month = month
-                , day = day
-                , hour = hour
-                , minute = minute
-                , second = 0
-                , millisecond = 0
-                }
+            String.fromInt initial.year
+                ++ "-"
+                ++ twoDigitMonth initial.month
+                ++ "-"
+                ++ twoDigit initial.day
+                ++ "T"
+                ++ twoDigit initial.hour
+                ++ ":"
+                ++ twoDigit initial.minute
     in
-    date_ (DateTimePicker.initialStateWithToday initialDateTime) initialDateTime
-        |> map toPosix
+    dateInputField initialDateTime
+        |> map (toPosix zone >> Maybe.withDefault initialValue)
 
 
-date_ : DateTimePicker.State -> DateTimePicker.DateTime -> Control DateTimePicker.DateTime
-date_ state initialValue =
+toPosix : Time.Zone -> String -> Maybe Time.Posix
+toPosix zone time =
+    case String.split "-" time of
+        yearStr :: monthStr :: remainder :: [] ->
+            case String.split "T" remainder of
+                dayStr :: rem :: [] ->
+                    case String.split ":" "rem" of
+                        hourStr :: minuteStr :: [] ->
+                            Maybe.map5
+                                (\year month day hour minute ->
+                                    Time.Extra.partsToPosix zone
+                                        { year = year
+                                        , month = month
+                                        , day = day
+                                        , hour = hour
+                                        , minute = minute
+                                        , second = 0
+                                        , millisecond = 0
+                                        }
+                                )
+                                (String.toInt yearStr)
+                                (monthFromStr monthStr)
+                                (String.toInt dayStr)
+                                (String.toInt hourStr)
+                                (String.toInt minuteStr)
+
+                        _ ->
+                            Nothing
+
+                _ ->
+                    Nothing
+
+        _ ->
+            Nothing
+
+
+monthFromStr : String -> Maybe Time.Month
+monthFromStr monthStr =
+    case monthStr of
+        "01" ->
+            Just Time.Jan
+
+        "02" ->
+            Just Time.Feb
+
+        "03" ->
+            Just Time.Mar
+
+        "04" ->
+            Just Time.Apr
+
+        "05" ->
+            Just Time.May
+
+        "06" ->
+            Just Time.Jun
+
+        "07" ->
+            Just Time.Jul
+
+        "08" ->
+            Just Time.Aug
+
+        "09" ->
+            Just Time.Sep
+
+        "10" ->
+            Just Time.Oct
+
+        "11" ->
+            Just Time.Nov
+
+        "12" ->
+            Just Time.Dec
+
+        _ ->
+            Nothing
+
+
+twoDigitMonth : Time.Month -> String
+twoDigitMonth month =
+    case month of
+        Time.Jan ->
+            "01"
+
+        Time.Feb ->
+            "02"
+
+        Time.Mar ->
+            "03"
+
+        Time.Apr ->
+            "04"
+
+        Time.May ->
+            "05"
+
+        Time.Jun ->
+            "06"
+
+        Time.Jul ->
+            "07"
+
+        Time.Aug ->
+            "08"
+
+        Time.Sep ->
+            "09"
+
+        Time.Oct ->
+            "10"
+
+        Time.Nov ->
+            "11"
+
+        Time.Dec ->
+            "12"
+
+
+twoDigit : Int -> String
+twoDigit val =
+    if val < 10 then
+        "0" ++ String.fromInt val
+
+    else
+        String.fromInt val
+
+
+dateInputField : String -> Control String
+dateInputField initialValue =
     Control
         { currentValue = \() -> initialValue
         , allValues = \() -> [ initialValue ] -- TODO
         , view =
             \() ->
                 SingleView <|
-                    Html.span
-                        [ Html.Attributes.style "display" "inline-block"
+                    Html.input
+                        [ Html.Attributes.type_ "datetime-local"
+                        , Html.Attributes.pattern "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
+                        , Html.Attributes.attribute "value" initialValue
+                        , Html.Events.onInput dateInputField
                         ]
-                        [ DateTimePicker.dateTimePicker
-                            (\newState newDate ->
-                                case newDate of
-                                    Nothing ->
-                                        date_ newState initialValue
-
-                                    Just d ->
-                                        date_ newState d
-                            )
-                            []
-                            state
-                            (Just initialValue)
-                            |> Html.Styled.toUnstyled
-                        ]
+                        []
         }
 
 
